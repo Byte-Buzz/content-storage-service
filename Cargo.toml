@@ -31,7 +31,17 @@ sqlx = { version = "0.8.6", features = [
     "runtime-tokio-rustls",
     "postgres",
     "macros",
+    "chrono",
+    "uuid",
 ] }
+
+# Error handling
+thiserror = "2.0.17"
+
+# Tools
+uuid = { version = "1.4.1", features = ["v4"] }
+chrono = "0.4.31"
+async-trait = "*"
 
 # Logging
 env_logger = "0.11.8"

@@ -1,5 +1,7 @@
 use crate::infrastructure::{config::Config, storage::create_s3_client};
 
+mod app;
+mod domain;
 mod infrastructure;
 
 #[actix_web::main]

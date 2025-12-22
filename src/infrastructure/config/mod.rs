@@ -2,6 +2,7 @@ mod env;
 mod validate;
 
 /// Main configuration structure holding all sub-configurations.
+#[derive(Debug, Clone)]
 pub struct Config {
     pub database: DatabaseConfig,
     pub server: ServerConfig,
@@ -9,12 +10,14 @@ pub struct Config {
 }
 
 /// Configuration structure for the web server.
+#[derive(Debug, Clone)]
 pub struct ServerConfig {
     pub host: String,
     pub port: u16,
 }
 
 /// Configuration structure for the database connection.
+#[derive(Debug, Clone)]
 pub struct DatabaseConfig {
     pub url: String,
     pub max_open_conns: u32,
@@ -23,6 +26,7 @@ pub struct DatabaseConfig {
 }
 
 /// Configuration structure for S3 storage.
+#[derive(Debug, Clone)]
 pub struct S3Config {
     pub endpoint: String,
     pub access_key: String,
