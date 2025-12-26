@@ -1,24 +1,31 @@
-use crate::{app::repository::Repositories, domain::interfaces, infrastructure::config::Config};
+use crate::{
+    app::{repository::Repositories, service::Services},
+    infrastructure::{config::Config, storage::S3Client},
+};
 
 pub mod repository;
+pub mod service;
 
 pub struct App {
-    pub s3_client: aws_sdk_s3::Client,
+    pub s3_client: S3Client,
     pub pg_pool: sqlx::PgPool,
     pub config: Config,
-    pub repository: Repositories,
+
+    pub repositories: Repositories,
+    pub services: Services,
 }
 
 impl App {
-    pub fn new(s3_client: aws_sdk_s3::Client, pg_pool: sqlx::PgPool, config: Config) -> Self {
-        let repository = Repositories::new(pg_pool.clone(), s3_client.clone(), config.clone());
+    pub fn new(s3_client: S3Client, pg_pool: sqlx::PgPool, config: Config) -> Self {
+        let repository = Repositories::new(pg_pool.clone(), s3_client.clone());
 
         Self {
             s3_client,
             pg_pool,
             config,
 
-            repository,
+            repositories: repository.clone(),
+            services: Services::new(repository),
         }
     }
 }

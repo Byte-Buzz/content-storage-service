@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package uploads;
+
+message CreateNewUploadRequest {
+  string          app_name   = 1;
+  optional int32  settings   = 2;
+  string          info_json  = 3;
+  optional uint64 expires_at = 4;
+}
+
+message CreateNewUploadResponse {
+  string upload_url = 1;
+}
+
+service Uploads {
+  // Create link for new file upload
+  rpc CreateNewUpload(CreateNewUploadRequest) returns (CreateNewUploadResponse);
+}

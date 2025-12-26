@@ -5,21 +5,30 @@ use crate::{
     domain::{
         errors::RepositoryError,
         interfaces::UploadInterface,
-        models::{CreateUpload, Upload},
+        models::{self, CreateUpload, Upload},
     },
 };
 
 pub struct UploadRepository {
-    pub pool: sqlx::PgPool,
+    pool: sqlx::PgPool,
+}
+
+impl UploadRepository {
+    #[inline(always)]
+    pub fn new(pool: sqlx::PgPool) -> Self {
+        Self { pool }
+    }
 }
 
 #[async_trait::async_trait]
 impl UploadInterface for UploadRepository {
-    async fn create(&self, upload: CreateUpload) -> Result<u64, RepositoryError> {
-        sqlx::query!(
+    async fn create(&self, upload: CreateUpload) -> Result<models::Upload, RepositoryError> {
+        sqlx::query_as!(
+            models::Upload,
             r#"
                 INSERT INTO uploads (id, app_id, settings, info, secret, expires_at)
                 VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id, app_id, settings, info, secret, created_at, expires_at
             "#,
             upload.id,
             upload.app_id,
@@ -30,9 +39,8 @@ impl UploadInterface for UploadRepository {
                 .expires_at
                 .unwrap_or(chrono::Utc::now().naive_utc() + Days::new(1)),
         )
-        .execute(&self.pool)
+        .fetch_one(&self.pool)
         .await
-        .map(|v| v.rows_affected())
         .map_err(map_sqlx_error)
     }
 

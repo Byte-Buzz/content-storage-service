@@ -1,28 +1,41 @@
-use aws_config::{BehaviorVersion, meta::region::RegionProviderChain};
-use aws_sdk_s3::{Client, config::Credentials};
+use s3::creds::Credentials;
 
 use crate::infrastructure::config::S3Config;
 
-/// Creates an S3 client from a given S3 configuration.
-///
-/// This function takes an S3 configuration and returns an S3 client.
-/// The client is created using the AWS SDK defaults, with the given
-/// configuration overriding the default endpoint URL and credentials.
-pub async fn create_s3_client(config: &S3Config) -> Client {
-    let region_provider = RegionProviderChain::default_provider().or_else("us-east-1");
+#[derive(Debug, Clone)]
+pub struct S3Client {
+    pub temp_bucket: Box<s3::Bucket>,
+    pub bucket: Box<s3::Bucket>,
+}
 
-    let config = aws_config::defaults(BehaviorVersion::latest())
-        .region(region_provider)
-        .credentials_provider(Credentials::new(
-            config.access_key.clone(),
-            config.secret_key.clone(),
+impl S3Client {
+    pub async fn new(config: &S3Config) -> Result<Self, Box<dyn std::error::Error>> {
+        let region_provider = s3::Region::Custom {
+            region: "custom".to_string(),
+            endpoint: config.endpoint.clone(),
+        };
+
+        let credentials_provider = Credentials::new(
+            Some(&config.access_key),
+            Some(&config.secret_key),
             None,
             None,
-            "rustfs",
-        ))
-        .endpoint_url(config.endpoint.clone())
-        .load()
-        .await;
+            None,
+        )?;
 
-    Client::new(&config)
+        let temp_bucket = s3::Bucket::new(
+            &config.temp_bucket,
+            region_provider.clone(),
+            credentials_provider.clone(),
+        )?
+        .with_path_style();
+
+        let bucket = s3::Bucket::new(&config.bucket, region_provider, credentials_provider)?
+            .with_path_style();
+
+        Ok(S3Client {
+            temp_bucket: temp_bucket,
+            bucket: bucket,
+        })
+    }
 }

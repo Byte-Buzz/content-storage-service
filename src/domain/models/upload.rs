@@ -20,3 +20,11 @@ pub struct CreateUpload {
     pub secret: String,
     pub expires_at: Option<NaiveDateTime>,
 }
+
+#[derive(Debug, Clone)]
+pub struct CreateNewUpload {
+    pub app_name: String,
+    pub settings: Option<i32>,
+    pub info: serde_json::Value,
+    pub expires_at: Option<NaiveDateTime>,
+}

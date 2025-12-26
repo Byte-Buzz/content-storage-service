@@ -18,5 +18,5 @@ pub enum RepositoryError {
     Query,
 
     #[error("internal repository error")]
-    Internal,
+    Internal(String),
 }

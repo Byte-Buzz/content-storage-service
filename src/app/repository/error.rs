@@ -10,6 +10,6 @@ pub fn map_sqlx_error(err: sqlx::Error) -> RepositoryError {
         | sqlx::Error::PoolTimedOut
         | sqlx::Error::PoolClosed => RepositoryError::Connection,
         sqlx::Error::Database(_) => RepositoryError::Query,
-        _ => RepositoryError::Internal,
+        e => RepositoryError::Internal(e.to_string()),
     }
 }
