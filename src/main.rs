@@ -5,7 +5,7 @@ use tokio::{
 };
 use tracing_actix_web::TracingLogger;
 
-use crate::infrastructure::{config::Config, logger::init_tracing, storage::S3Client};
+use crate::infrastructure::{config::Config, logger::init_tracing, storage::create_s3_client};
 
 mod app;
 mod domain;
@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     init_tracing();
 
     let config = Config::from_env()?;
-    let s3_client = S3Client::new(&config.s3).await?;
+    let s3_client = create_s3_client(&config.s3).await;
 
     let pg_pool = infrastructure::database::create_pg_pool(&config.database).await?;
 

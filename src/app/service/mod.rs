@@ -14,16 +14,8 @@ pub struct Services {
 
 impl Services {
     pub fn new(repositories: repository::Repositories) -> Self {
-        let upload_service = UploadService::new(
-            repositories.upload_repository,
-            repositories.app_repository.clone_box(),
-        );
-
-        let file_service = FileService::new(
-            repositories.app_repository,
-            repositories.s3_repository,
-            repositories.file_repository,
-        );
+        let upload_service = UploadService::new(repositories.clone());
+        let file_service = FileService::new(repositories.clone());
 
         Self {
             upload_service,

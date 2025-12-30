@@ -5,10 +5,9 @@ mod file_repository;
 mod s3_repository;
 mod upload_repository;
 
-use crate::{
-    domain::interfaces,
-    infrastructure::{config::S3Config, storage::S3Client},
-};
+use aws_sdk_s3::Client;
+
+use crate::{domain::interfaces, infrastructure::config::S3Config};
 
 pub(self) use self::error::map_sqlx_error;
 
@@ -20,12 +19,12 @@ pub struct Repositories {
 }
 
 impl Repositories {
-    pub fn new(pool: sqlx::PgPool, s3_client: S3Client) -> Self {
+    pub fn new(pool: sqlx::PgPool, s3_client: Client, config: &S3Config) -> Self {
         Self {
             upload_repository: Box::new(upload_repository::UploadRepository::new(pool.clone())),
             app_repository: Box::new(app_repository::AppRepository::new(pool.clone())),
             file_repository: Box::new(file_repository::FileRepository::new(pool.clone())),
-            s3_repository: Box::new(s3_repository::S3Repository::new(s3_client)),
+            s3_repository: Box::new(s3_repository::S3Repository::new(s3_client, config)),
         }
     }
 }

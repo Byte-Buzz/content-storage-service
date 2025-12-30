@@ -5,18 +5,21 @@ pub enum RepositoryError {
     #[error("entity not found")]
     NotFound,
 
-    #[error("conflict")]
-    Conflict,
+    #[error("conflict: {0}")]
+    Conflict(String),
 
-    #[error("invalid argument")]
-    InvalidArgument,
+    #[error("invalid argument: {0}")]
+    InvalidArgument(String),
 
-    #[error("connection error")]
-    Connection,
+    #[error("connection error: {0}")]
+    Connection(String),
 
-    #[error("query failed")]
-    Query,
+    #[error("query failed: {0}")]
+    Query(String),
 
-    #[error("internal repository error")]
+    #[error("io error: {0}")]
+    Io(std::io::Error),
+
+    #[error("internal repository error: {0}")]
     Internal(String),
 }

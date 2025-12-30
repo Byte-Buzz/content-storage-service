@@ -1,10 +1,14 @@
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
+use chrono::NaiveDateTime;
 use rand::{RngCore, TryRngCore, rngs::OsRng};
 use sha2::{Digest, Sha256};
 
-use crate::domain::{
-    errors::{self, ServiceError},
-    interfaces, models,
+use crate::{
+    app::repository::Repositories,
+    domain::{
+        errors::{self, ServiceError},
+        interfaces, models,
+    },
 };
 
 pub struct UploadService {
@@ -13,13 +17,10 @@ pub struct UploadService {
 }
 
 impl UploadService {
-    pub fn new(
-        upload_repository: Box<dyn interfaces::UploadInterface>,
-        app_repository: Box<dyn interfaces::AppInterface>,
-    ) -> Self {
+    pub fn new(repositories: Repositories) -> Self {
         Self {
-            upload_repository,
-            app_repository,
+            upload_repository: repositories.upload_repository,
+            app_repository: repositories.app_repository,
         }
     }
 
@@ -44,10 +45,17 @@ impl UploadService {
         let upload = models::CreateUpload {
             id: uuid::Uuid::new_v4(),
             app_id: app.id,
+            filename: upload.filename,
+            content_type: upload.content_type,
+            max_size: upload.max_size as i32,
             settings: upload.settings,
             info: upload.info,
+            access: upload.access,
             secret: hex::encode(hash),
-            expires_at: upload.expires_at,
+            expires_at: upload.upload_url_ttl.map(|ttl| {
+                let now = chrono::Utc::now().naive_utc();
+                now + chrono::Duration::seconds(ttl as i64)
+            }),
         };
 
         let mut upload = self.upload_repository.create(upload).await?;

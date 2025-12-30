@@ -25,6 +25,16 @@ impl ServiceError {
                     HttpErrorStatus::NotFound,
                     HttpErrorBody::Message("not found".to_string()),
                 ),
+                RepositoryError::Io(e) => match e.kind() {
+                    std::io::ErrorKind::FileTooLarge => HttpError::new(
+                        HttpErrorStatus::PayloadTooLarge,
+                        HttpErrorBody::Message("file too large".to_string()),
+                    ),
+                    _ => HttpError::new(
+                        HttpErrorStatus::InternalServerError,
+                        HttpErrorBody::Message(e.to_string()),
+                    ),
+                },
                 _ => HttpError::new(
                     HttpErrorStatus::InternalServerError,
                     HttpErrorBody::Message(e.to_string()),

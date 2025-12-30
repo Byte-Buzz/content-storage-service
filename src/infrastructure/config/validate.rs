@@ -38,5 +38,7 @@ pub fn validate_config(config: &Config) -> Result<(), String> {
         return Err("S3 bucket cannot be empty".to_string());
     }
 
+    println!("{:#?}", config);
+
     Ok(())
 }

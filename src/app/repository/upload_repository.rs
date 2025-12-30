@@ -26,15 +26,21 @@ impl UploadInterface for UploadRepository {
         sqlx::query_as!(
             models::Upload,
             r#"
-                INSERT INTO uploads (id, app_id, settings, info, secret, expires_at)
-                VALUES ($1, $2, $3, $4, $5, $6)
-                RETURNING id, app_id, settings, info, secret, created_at, expires_at
+                INSERT INTO uploads (id, app_id, filename, content_type, max_size, settings,
+                    info, secret, access, expires_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                RETURNING id, app_id, filename, content_type, max_size, settings, info,
+                    secret, access as "access!: _", created_at, expires_at
             "#,
             upload.id,
             upload.app_id,
-            upload.settings,
+            upload.filename,
+            upload.content_type,
+            upload.max_size,
+            upload.settings.unwrap_or(0),
             upload.info,
             upload.secret,
+            upload.access as _,
             upload
                 .expires_at
                 .unwrap_or(chrono::Utc::now().naive_utc() + Days::new(1)),
@@ -61,7 +67,9 @@ impl UploadInterface for UploadRepository {
         sqlx::query_as!(
             Upload,
             r#"
-                SELECT id, app_id, settings, info, secret, created_at, expires_at
+                SELECT id, app_id, filename, content_type, max_size, settings, info,
+                    secret, access as "access!: _",
+                    created_at, expires_at
                 FROM uploads
                 WHERE id = $1
             "#,

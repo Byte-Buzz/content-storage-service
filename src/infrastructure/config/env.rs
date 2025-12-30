@@ -62,10 +62,10 @@ pub fn parse_env_config() -> Result<Config, Box<dyn std::error::Error>> {
         s3: S3Config {
             endpoint: get_env("S3_ENDPOINT")
                 .unwrap_or_else(|_| "http://localhost:9000".to_string()),
-            access_key: get_env("S3_ACCESS_KEY").unwrap_or_else(|_| "rustfsadmin".to_string()),
+            access_key: get_env("S3_ACCESS_KEY").unwrap_or("rustfsadmin".to_string()),
             secret_key: get_env("S3_SECRET_KEY").unwrap_or(String::new()),
-            temp_bucket: get_env("S3_TEMP_BUCKET").unwrap_or_else(|_| "css-temp".to_string()),
-            bucket: get_env("S3_BUCKET").unwrap_or_else(|_| "css".to_string()),
+            temp_bucket: get_env("S3_TEMP_BUCKET").unwrap_or("css-temp".to_string()),
+            bucket: get_env("S3_BUCKET").unwrap_or("css".to_string()),
         },
     })
 }

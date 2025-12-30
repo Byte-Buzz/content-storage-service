@@ -11,6 +11,7 @@ pub enum HttpErrorBody {
 pub enum HttpErrorStatus {
     NotFound,
     BadRequest,
+    PayloadTooLarge,
     Forbidden,
     InternalServerError,
 }
@@ -30,6 +31,7 @@ impl HttpError {
         let mut response = match self.status {
             HttpErrorStatus::NotFound => actix_web::HttpResponse::NotFound(),
             HttpErrorStatus::BadRequest => actix_web::HttpResponse::BadRequest(),
+            HttpErrorStatus::PayloadTooLarge => actix_web::HttpResponse::PayloadTooLarge(),
             HttpErrorStatus::Forbidden => actix_web::HttpResponse::Forbidden(),
             HttpErrorStatus::InternalServerError => actix_web::HttpResponse::InternalServerError(),
         };

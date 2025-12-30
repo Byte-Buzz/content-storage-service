@@ -1,13 +1,15 @@
+use aws_sdk_s3::Client;
+
 use crate::{
     app::{repository::Repositories, service::Services},
-    infrastructure::{config::Config, storage::S3Client},
+    infrastructure::config::Config,
 };
 
 pub mod repository;
 pub mod service;
 
 pub struct App {
-    pub s3_client: S3Client,
+    pub s3_client: Client,
     pub pg_pool: sqlx::PgPool,
     pub config: Config,
 
@@ -16,8 +18,8 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(s3_client: S3Client, pg_pool: sqlx::PgPool, config: Config) -> Self {
-        let repository = Repositories::new(pg_pool.clone(), s3_client.clone());
+    pub fn new(s3_client: Client, pg_pool: sqlx::PgPool, config: Config) -> Self {
+        let repository = Repositories::new(pg_pool.clone(), s3_client.clone(), &config.s3);
 
         Self {
             s3_client,
