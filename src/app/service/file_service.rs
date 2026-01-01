@@ -4,9 +4,9 @@ use tokio_util::io::StreamReader;
 use crate::{
     app::repository::Repositories,
     domain::{
-        errors::ServiceError,
+        errors::{RepositoryError, ServiceError},
         interfaces,
-        models::{self, UploadFileRequest},
+        models::{self, FileResponse, FileResponseFile, UploadFileRequest},
     },
 };
 
@@ -129,6 +129,52 @@ impl FileService {
             key,
             filename: file_name,
         })
+    }
+
+    pub async fn get_file(
+        &self,
+        app: &str,
+        file_id: uuid::Uuid,
+        e_tag: Option<&str>,
+        _query: models::PresignedQuery,
+    ) -> Result<FileResponse, ServiceError> {
+        let app = match app.parse::<u32>() {
+            Ok(v) => self.app_repository.get_by_id(v as i64).await?,
+            Err(_) => self.app_repository.get_by_name(app).await?,
+        };
+
+        let file = self.file_repository.get_by_id(file_id).await?;
+
+        if file.app_id != app.id {
+            return Err(RepositoryError::NotFound.into());
+        }
+
+        if let Some(e_tag) = e_tag {
+            if e_tag != file.e_tag {
+                return Ok(FileResponse::NotModified);
+            }
+        }
+
+        let key = format!("{}/{}", app.name, file_id);
+
+        let mut file_response = self.s3_repository.get_file(&key).await?;
+
+        if file_response.e_tag.is_empty() {
+            file_response.e_tag = file.e_tag;
+        }
+
+        if file_response.content_type.is_empty() {
+            file_response.content_type = file.content_type;
+        }
+
+        Ok(FileResponseFile {
+            file: Box::new(file_response.file),
+            content_type: file_response.content_type,
+            e_tag: file_response.e_tag,
+            filename: file.filename,
+            size: file_response.size,
+        }
+        .into())
     }
 }
 

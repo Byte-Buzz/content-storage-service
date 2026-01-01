@@ -120,6 +120,23 @@ impl FileInterface for FileRepository {
         Ok(result1)
     }
 
+    async fn get_by_id(&self, id: uuid::Uuid) -> Result<models::File, RepositoryError> {
+        sqlx::query_as!(
+            models::File,
+            r#"
+                SELECT id, app_id, filename, content_type, e_tag,
+                    access as "access!: _", miniatures, miniature_extension,
+                    created_at
+                FROM files
+                WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(map_sqlx_error)
+    }
+
     fn clone_box(&self) -> Box<dyn FileInterface + Send + Sync> {
         Box::new(FileRepository {
             pool: self.pool.clone(),

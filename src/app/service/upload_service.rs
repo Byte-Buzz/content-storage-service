@@ -1,6 +1,5 @@
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
-use chrono::NaiveDateTime;
-use rand::{RngCore, TryRngCore, rngs::OsRng};
+use rand::{TryRngCore, rngs::OsRng};
 use sha2::{Digest, Sha256};
 
 use crate::{

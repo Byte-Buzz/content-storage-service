@@ -1,9 +1,12 @@
-use aws_sdk_s3::{Client, primitives::ByteStream};
+use aws_sdk_s3::primitives::ByteStream;
 use tokio::io::{AsyncRead, AsyncReadExt};
-use tonic::IntoRequest;
 
 use crate::{
-    domain::{errors::RepositoryError, interfaces::S3Interface, models::UploadFileRequest},
+    domain::{
+        errors::RepositoryError,
+        interfaces::S3Interface,
+        models::{FileResponseFile, UploadFileRequest},
+    },
     infrastructure::{config::S3Config, storage::S3Client},
 };
 
@@ -39,6 +42,25 @@ impl S3Interface for S3Repository {
         request: UploadFileRequest<'_>,
     ) -> Result<Option<String>, RepositoryError> {
         self.upload_to_s3(&self.temp_bucket, request).await
+    }
+
+    async fn get_file(&self, key: &str) -> Result<FileResponseFile, RepositoryError> {
+        let obj = self
+            .s3_client
+            .get_object()
+            .bucket(&self.permanent_bucket)
+            .key(key)
+            .send()
+            .await
+            .map_err(|e| RepositoryError::Internal(e.to_string()))?;
+
+        Ok(FileResponseFile {
+            file: Box::new(obj.body.into_async_read()),
+            content_type: obj.content_type.unwrap_or_default(),
+            e_tag: obj.e_tag.unwrap_or_default(),
+            filename: String::new(),
+            size: obj.content_length.map(|v| v as u32),
+        })
     }
 
     fn clone_box(&self) -> Box<dyn S3Interface + Send + Sync> {

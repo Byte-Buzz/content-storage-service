@@ -62,3 +62,22 @@ impl From<crate::domain::errors::RepositoryError> for ServiceError {
         ServiceError::RepositoryError(err)
     }
 }
+
+impl From<ServiceError> for actix_web::Error {
+    fn from(value: ServiceError) -> Self {
+        match value {
+            ServiceError::BadRequest(e) => actix_web::error::ErrorBadRequest(e),
+            ServiceError::Forbidden => actix_web::error::ErrorForbidden("forbidden"),
+            ServiceError::RepositoryError(e) => match e {
+                RepositoryError::Io(e) => match e.kind() {
+                    std::io::ErrorKind::FileTooLarge => {
+                        actix_web::error::ErrorPayloadTooLarge(e.to_string())
+                    }
+                    _ => actix_web::error::ErrorInternalServerError(e.to_string()),
+                },
+                _ => actix_web::error::ErrorInternalServerError(e.to_string()),
+            },
+            _ => actix_web::error::ErrorInternalServerError(value.to_string()),
+        }
+    }
+}

@@ -3,6 +3,7 @@ pub struct HttpError {
     pub body: HttpErrorBody,
 }
 
+#[allow(dead_code)]
 pub enum HttpErrorBody {
     Message(String),
     Json(serde_json::Value),

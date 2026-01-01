@@ -1,6 +1,7 @@
-use tokio::io::AsyncRead;
-
-use crate::domain::{errors::RepositoryError, models::UploadFileRequest};
+use crate::domain::{
+    errors::RepositoryError,
+    models::{FileResponseFile, UploadFileRequest},
+};
 
 #[async_trait::async_trait(?Send)]
 pub trait S3Interface: Send + Sync {
@@ -13,6 +14,8 @@ pub trait S3Interface: Send + Sync {
         &self,
         request: UploadFileRequest<'_>,
     ) -> Result<Option<String>, RepositoryError>;
+
+    async fn get_file(&self, key: &str) -> Result<FileResponseFile, RepositoryError>;
 
     async fn max_file_size(&self) -> u32 {
         2 * 1024 * 1024 * 1024

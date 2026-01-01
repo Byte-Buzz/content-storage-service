@@ -1,10 +1,9 @@
 use actix_multipart::Field;
-use mime_guess::Mime;
 use tokio::io::AsyncRead;
 
 use crate::domain::models::Upload;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct FileInfo {
     pub key: String,
     pub filename: String,
@@ -71,6 +70,25 @@ pub struct UploadFileRequest<'a> {
     pub key: String,
     pub file: &'a mut (dyn AsyncRead + Unpin),
     pub content_type: String,
+}
+
+pub enum FileResponse {
+    File(FileResponseFile),
+    NotModified,
+}
+
+impl From<FileResponseFile> for FileResponse {
+    fn from(value: FileResponseFile) -> Self {
+        FileResponse::File(value)
+    }
+}
+
+pub struct FileResponseFile {
+    pub file: Box<dyn AsyncRead + Unpin>,
+    pub content_type: String,
+    pub filename: String,
+    pub e_tag: String,
+    pub size: Option<u32>,
 }
 
 pub struct FileSettings {

@@ -11,20 +11,14 @@ use crate::{
     app::service::Services,
     domain::{
         errors::{HttpError, HttpErrorBody, HttpErrorStatus},
-        models::UploadFile,
+        models::{SecretQuery, UploadFile},
     },
 };
-
-#[derive(serde::Deserialize)]
-struct UploadFileQuery {
-    secret: String,
-    expires_at: Option<u64>,
-}
 
 #[post("/upload/{id}")]
 async fn upload_file(
     id: Path<String>,
-    query: Query<UploadFileQuery>,
+    query: Query<SecretQuery>,
     services: Data<Services>,
     mut files: Multipart,
 ) -> impl Responder {
@@ -85,5 +79,5 @@ async fn upload_file(
 
     let file_info = file_info.unwrap();
 
-    HttpResponse::Ok().body(id.to_string())
+    HttpResponse::Created().json(file_info)
 }

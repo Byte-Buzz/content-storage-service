@@ -56,7 +56,7 @@ impl Uploads for UploadGrpcHandler {
         Ok(tonic::Response::new(uploads::CreateUploadResponse {
             file_id: upload.id.to_string(),
             upload_url: format!(
-                "{}upload/{}?secret={}&expires_at={}",
+                "{}upload/{}?secret={}&expires={}",
                 self.base_url,
                 upload.id,
                 upload.secret,
