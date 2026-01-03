@@ -47,7 +47,5 @@ CREATE TABLE files
     content_type TEXT NOT NULL,
     e_tag TEXT NOT NULL,
     access file_access NOT NULL DEFAULT 'private',
-    miniatures INTEGER[] NOT NULL DEFAULT '{}',
-    miniature_extension TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

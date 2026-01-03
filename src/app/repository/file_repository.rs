@@ -26,20 +26,17 @@ impl FileInterface for FileRepository {
             models::File,
             r#"
                 INSERT INTO files (id, app_id, filename, content_type,
-                    e_tag, access, miniatures, miniature_extension)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    e_tag, access)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING id, app_id, filename, content_type, e_tag,
-                    access as "access!: _", miniatures, miniature_extension,
-                    created_at
+                    access as "access!: _", created_at
             "#,
             file.id,
             file.app_id,
             file.filename,
             file.content_type,
             file.e_tag,
-            file.access as _,
-            &file.miniatures,
-            file.miniature_extension
+            file.access as _
         )
         .fetch_one(&mut *tx)
         .await;
@@ -125,8 +122,7 @@ impl FileInterface for FileRepository {
             models::File,
             r#"
                 SELECT id, app_id, filename, content_type, e_tag,
-                    access as "access!: _", miniatures, miniature_extension,
-                    created_at
+                    access as "access!: _", created_at
                 FROM files
                 WHERE id = $1
             "#,

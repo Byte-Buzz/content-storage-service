@@ -1,22 +1,22 @@
 use std::str::FromStr;
 
-use uploads::uploads_server::{Uploads, UploadsServer};
+use content_storage::content_storage_server::{ContentStorage, ContentStorageServer};
 
 use crate::{
     app::{self, service::UploadService},
     domain::models,
 };
 
-pub mod uploads {
-    tonic::include_proto!("uploads");
+pub mod content_storage {
+    tonic::include_proto!("content_storage");
 }
 
-pub struct UploadGrpcHandler {
+pub struct ContentServiceGrpcHandler {
     uploads_service: UploadService,
     base_url: String,
 }
 
-impl UploadGrpcHandler {
+impl ContentServiceGrpcHandler {
     pub fn new(app: &app::App) -> Self {
         Self {
             uploads_service: app.services.upload_service.clone(),
@@ -26,11 +26,11 @@ impl UploadGrpcHandler {
 }
 
 #[tonic::async_trait]
-impl Uploads for UploadGrpcHandler {
+impl ContentStorage for ContentServiceGrpcHandler {
     async fn create_upload(
         &self,
-        request: tonic::Request<uploads::CreateUploadRequest>,
-    ) -> Result<tonic::Response<uploads::CreateUploadResponse>, tonic::Status> {
+        request: tonic::Request<content_storage::CreateUploadRequest>,
+    ) -> Result<tonic::Response<content_storage::CreateUploadResponse>, tonic::Status> {
         let data = models::CreateNewUpload {
             app_name: request.get_ref().app_name.clone(),
             filename: request.get_ref().filename.clone(),
@@ -43,7 +43,7 @@ impl Uploads for UploadGrpcHandler {
             })?,
             upload_url_ttl: request.get_ref().upload_url_ttl,
             access: match request.get_ref().visibility() {
-                uploads::FileVisibility::Public => models::FileAccess::Public,
+                content_storage::FileVisibility::Public => models::FileAccess::Public,
                 _ => models::FileAccess::Private,
             },
         };
@@ -53,23 +53,25 @@ impl Uploads for UploadGrpcHandler {
             tonic::Status::internal(e.to_string())
         })?;
 
-        Ok(tonic::Response::new(uploads::CreateUploadResponse {
-            file_id: upload.id.to_string(),
-            upload_url: format!(
-                "{}upload/{}?secret={}&expires={}",
-                self.base_url,
-                upload.id,
-                upload.secret,
-                upload.expires_at.and_utc().timestamp(),
-            ),
-            upload_expires_at: upload.expires_at.and_utc().timestamp() as u64,
-        }))
+        Ok(tonic::Response::new(
+            content_storage::CreateUploadResponse {
+                file_id: upload.id.to_string(),
+                upload_url: format!(
+                    "{}upload/{}?secret={}&expires={}",
+                    self.base_url,
+                    upload.id,
+                    upload.secret,
+                    upload.expires_at.and_utc().timestamp(),
+                ),
+                upload_expires_at: upload.expires_at.and_utc().timestamp() as u64,
+            },
+        ))
     }
 
     async fn get_download_url(
         &self,
-        request: tonic::Request<uploads::GetDownloadUrlRequest>,
-    ) -> Result<tonic::Response<uploads::GetDownloadUrlResponse>, tonic::Status> {
+        request: tonic::Request<content_storage::GetDownloadUrlRequest>,
+    ) -> Result<tonic::Response<content_storage::GetDownloadUrlResponse>, tonic::Status> {
         let id = uuid::Uuid::from_str(&request.get_ref().file_id).map_err(|e| {
             tracing::error!("Failed to parse file id: {}", e);
             tonic::Status::invalid_argument(e.to_string())
@@ -77,8 +79,15 @@ impl Uploads for UploadGrpcHandler {
 
         todo!("id: {}", id);
     }
+
+    async fn change_file_visibility(
+        &self,
+        request: tonic::Request<content_storage::ChangeVisibilityRequest>,
+    ) -> Result<tonic::Response<content_storage::ChangeVisibilityResponse>, tonic::Status> {
+        todo!()
+    }
 }
 
-pub fn create_grpc_service(app: &app::App) -> UploadsServer<UploadGrpcHandler> {
-    UploadsServer::new(UploadGrpcHandler::new(app))
+pub fn create_grpc_service(app: &app::App) -> ContentStorageServer<ContentServiceGrpcHandler> {
+    ContentStorageServer::new(ContentServiceGrpcHandler::new(app))
 }

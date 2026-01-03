@@ -56,7 +56,7 @@ impl FileService {
             });
 
         let file_name = file.upload.filename;
-        let key = format!("{}/{}", app.name, file_name);
+        let key = format!("{}/{}", app.name, file.upload.id);
 
         let file_settings = models::FileSettings::from(file.upload.settings);
 
@@ -138,24 +138,35 @@ impl FileService {
         e_tag: Option<&str>,
         _query: models::PresignedQuery,
     ) -> Result<FileResponse, ServiceError> {
+        tracing::info!("get file");
+        tracing::debug!("get file: {}/{}", app, file_id);
+
         let app = match app.parse::<u32>() {
             Ok(v) => self.app_repository.get_by_id(v as i64).await?,
             Err(_) => self.app_repository.get_by_name(app).await?,
         };
 
+        tracing::debug!("app: {:#?}", app);
+
         let file = self.file_repository.get_by_id(file_id).await?;
 
+        tracing::debug!("file: {:#?}", file);
+
         if file.app_id != app.id {
+            tracing::debug!("file does not belong to app");
             return Err(RepositoryError::NotFound.into());
         }
 
         if let Some(e_tag) = e_tag {
             if e_tag != file.e_tag {
+                tracing::debug!("e_tag does not match");
                 return Ok(FileResponse::NotModified);
             }
         }
 
         let key = format!("{}/{}", app.name, file_id);
+
+        tracing::debug!("key: {}", key);
 
         let mut file_response = self.s3_repository.get_file(&key).await?;
 

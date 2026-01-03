@@ -75,6 +75,7 @@ impl From<ServiceError> for actix_web::Error {
                     }
                     _ => actix_web::error::ErrorInternalServerError(e.to_string()),
                 },
+                RepositoryError::NotFound => actix_web::error::ErrorNotFound(e.to_string()),
                 _ => actix_web::error::ErrorInternalServerError(e.to_string()),
             },
             _ => actix_web::error::ErrorInternalServerError(value.to_string()),

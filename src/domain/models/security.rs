@@ -6,6 +6,6 @@ pub struct SecretQuery {
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PresignedQuery {
-    pub expires: String,
-    pub signature: String,
+    pub expires: Option<String>,
+    pub signature: Option<String>,
 }

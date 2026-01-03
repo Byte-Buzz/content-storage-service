@@ -17,8 +17,6 @@ pub struct File {
     pub content_type: String,
     pub e_tag: String,
     pub access: FileAccess,
-    pub miniatures: Vec<i32>,
-    pub miniature_extension: Option<String>,
     pub created_at: chrono::NaiveDateTime,
 }
 

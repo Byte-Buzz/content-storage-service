@@ -52,7 +52,10 @@ impl S3Interface for S3Repository {
             .key(key)
             .send()
             .await
-            .map_err(|e| RepositoryError::Internal(e.to_string()))?;
+            .map_err(|e| match e.as_service_error() {
+                Some(e) if e.is_no_such_key() => RepositoryError::NotFound,
+                _ => RepositoryError::Internal(e.to_string()),
+            })?;
 
         Ok(FileResponseFile {
             file: Box::new(obj.body.into_async_read()),

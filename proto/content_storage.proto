@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package uploads;
+package content_storage;
 
 // =====================
 // Upload
@@ -70,10 +70,27 @@ enum FileVisibility {
 }
 
 // =====================
+// Change Visibility
+// =====================
+
+message ChangeVisibilityRequest {
+  // List of file IDs
+  repeated string file_ids = 1;
+
+  // New visibility
+  FileVisibility visibility = 2;
+}
+
+message ChangeVisibilityResponse {
+  // Number of files updated
+  uint32 updated_count = 1;
+}
+
+// =====================
 // Service
 // =====================
 
-service Uploads {
+service ContentStorage {
   // Create a temporary upload URL
   rpc CreateUpload(CreateUploadRequest)
       returns (CreateUploadResponse);
@@ -81,4 +98,8 @@ service Uploads {
   // Get a presigned download URL for a private file
   rpc GetDownloadUrl(GetDownloadUrlRequest)
       returns (GetDownloadUrlResponse);
+
+  // Change file visibility
+  rpc ChangeFileVisibility(ChangeVisibilityRequest)
+      returns (ChangeVisibilityResponse);
 }
