@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package content_storage;
+
+// =====================
+// Upload
+// =====================
+
+message CreateUploadRequest {
+  // Namespace / prefix
+  string app_name = 1;
+
+  // Original file name
+  string filename = 2;
+
+  // MIME type of the file
+  string content_type = 3;
+
+  // Maximum allowed file size in bytes
+  uint32 max_size = 4;
+
+  // Settings for workers / pipeline (bitmask)
+  optional uint32 settings = 5;
+
+  // Opaque payload for workers or business logic
+  string info_json = 6;
+
+  // TTL for the upload URL (seconds from generation)
+  optional uint32 upload_url_ttl = 7;
+
+  // Visibility of the file (default PRIVATE)
+  FileVisibility visibility = 8;
+}
+
+message CreateUploadResponse {
+  // Unique file identifier
+  string file_id = 1;
+
+  // Temporary upload URL
+  string upload_url = 2;
+
+  // Expiration time of the upload URL (unix timestamp)
+  uint64 upload_expires_at = 3;
+}
+
+// =====================
+// Download / Access
+// =====================
+
+message GetDownloadUrlRequest {
+  string file_id = 1;
+}
+
+message GetDownloadUrlResponse {
+  // Temporary URL for private file download
+  string download_url = 1;
+
+  // Expiration time of the download URL (unix timestamp)
+  uint64 expires_at = 2;
+}
+
+// =====================
+// Visibility
+// =====================
+
+enum FileVisibility {
+  FILE_VISIBILITY_UNSPECIFIED = 0;
+  PRIVATE = 1;
+  PUBLIC = 2;
+}
+
+// =====================
+// Change Visibility
+// =====================
+
+message ChangeVisibilityRequest {
+  // List of file IDs
+  repeated string file_ids = 1;
+
+  // New visibility
+  FileVisibility visibility = 2;
+}
+
+message ChangeVisibilityResponse {
+  // Number of files updated
+  uint32 updated_count = 1;
+}
+
+// =====================
+// Service
+// =====================
+
+service ContentStorage {
+  // Create a temporary upload URL
+  rpc CreateUpload(CreateUploadRequest)
+      returns (CreateUploadResponse);
+
+  // Get a presigned download URL for a private file
+  rpc GetDownloadUrl(GetDownloadUrlRequest)
+      returns (GetDownloadUrlResponse);
+
+  // Change file visibility
+  rpc ChangeFileVisibility(ChangeVisibilityRequest)
+      returns (ChangeVisibilityResponse);
+}
