@@ -1,7 +1,7 @@
 use chrono::Days;
 
 use crate::{
-    app::repository::map_sqlx_error,
+    repository::map_sqlx_error,
     domain::{
         errors::RepositoryError,
         interfaces::UploadInterface,

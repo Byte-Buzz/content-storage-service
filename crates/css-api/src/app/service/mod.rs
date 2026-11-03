@@ -3,12 +3,11 @@ pub mod error;
 mod file_service;
 mod upload_service;
 
+use css_core::repository;
 pub use file_service::FileService;
 pub use upload_service::UploadService;
 
 pub use file_service::UploadFile;
-
-use crate::app::repository;
 
 #[derive(Clone)]
 pub struct Services {

@@ -1,11 +1,7 @@
-mod database;
-mod env;
 mod server;
-mod storage;
 
-pub use database::DatabaseConfig;
+use css_core::infrastructure::config::{DatabaseConfig, S3Config};
 pub use server::{GrpcConfig, ServerConfig};
-pub use storage::S3Config;
 
 /// Main configuration structure holding all sub-configurations.
 #[derive(Debug, Clone)]

@@ -1,15 +1,16 @@
 use actix_multipart::Field;
-use futures_util::{StreamExt, TryStreamExt};
-use tokio_util::io::StreamReader;
-
-use crate::{
-    app::{repository::Repositories, service::error::ServiceError},
+use css_core::{
     domain::{
         errors::RepositoryError,
         interfaces,
         models::{self, FileResponse, FileResponseFile, Upload, UploadFileRequest},
     },
+    repository::Repositories,
 };
+use futures_util::{StreamExt, TryStreamExt};
+use tokio_util::io::StreamReader;
+
+use crate::app::service::error::ServiceError;
 
 pub struct FileService {
     upload_repository: Box<dyn interfaces::UploadInterface>,

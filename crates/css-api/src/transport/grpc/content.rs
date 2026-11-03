@@ -1,11 +1,9 @@
 use std::str::FromStr;
 
 use content_storage::content_storage_server::{ContentStorage, ContentStorageServer};
+use css_core::domain::models;
 
-use crate::{
-    app::{self, service::UploadService},
-    domain::models,
-};
+use crate::app::{self, service::UploadService};
 
 pub mod content_storage {
     tonic::include_proto!("content_storage");

@@ -1,11 +1,12 @@
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
+use css_core::{
+    domain::{interfaces, models},
+    repository::Repositories,
+};
 use rand::{TryRngCore, rngs::OsRng};
 use sha2::{Digest, Sha256};
 
-use crate::{
-    app::{repository::Repositories, service::error::ServiceError},
-    domain::{interfaces, models},
-};
+use crate::app::service::error::ServiceError;
 
 pub struct UploadService {
     upload_repository: Box<dyn interfaces::UploadInterface>,

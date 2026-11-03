@@ -6,6 +6,8 @@ members = [
 ]
 
 [workspace.dependencies]
+css-core = { path = "crates/css-core" }
+
 # Web framework
 actix-web = "4.12.1"
 actix-multipart = "0.7.2"

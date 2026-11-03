@@ -1,15 +1,17 @@
 use actix_web::{App, HttpServer, web};
+use css_core::infrastructure::{
+    database::create_pg_pool, logger::init_tracing, storage::create_s3_client,
+};
 use tokio::{
     signal::unix::{SignalKind, signal},
     sync::oneshot,
 };
 use tracing_actix_web::TracingLogger;
 
-use crate::infrastructure::{config::Config, logger::init_tracing, storage::create_s3_client};
+use crate::config::Config;
 
 mod app;
-mod domain;
-mod infrastructure;
+mod config;
 mod transport;
 
 #[actix_web::main]
@@ -19,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::from_env()?;
     let s3_client = create_s3_client(&config.s3).await;
 
-    let pg_pool = infrastructure::database::create_pg_pool(&config.database).await?;
+    let pg_pool = create_pg_pool(&config.database).await?;
 
     let app = app::App::new(s3_client, pg_pool, config.clone());
 

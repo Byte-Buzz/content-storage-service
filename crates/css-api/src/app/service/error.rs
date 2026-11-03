@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::domain::errors::RepositoryError;
+use css_core::domain::errors::RepositoryError;
 
 #[derive(Debug, Error)]
 pub enum ServiceError {

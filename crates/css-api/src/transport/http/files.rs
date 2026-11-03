@@ -5,11 +5,10 @@ use actix_web::{
     http::header,
     web::{Data, Path, Query},
 };
+use css_core::domain::models::FileResponse;
 use tokio_util::io::ReaderStream;
 
-use crate::{
-    app::service::Services, domain::models::FileResponse, transport::http::query::PresignedQuery,
-};
+use crate::{app::service::Services, transport::http::query::PresignedQuery};
 
 #[get("/{app}/{file_id}")]
 async fn get_file(

@@ -1,4 +1,6 @@
-use crate::{app::service::error::ServiceError, domain::errors::RepositoryError};
+use css_core::domain::errors::RepositoryError;
+
+use crate::app::service::error::ServiceError;
 
 pub struct HttpError {
     pub status: HttpErrorStatus,

@@ -1,11 +1,8 @@
 use aws_sdk_s3::Client;
+use css_core::repository::Repositories;
 
-use crate::{
-    app::{repository::Repositories, service::Services},
-    infrastructure::config::Config,
-};
+use crate::{app::service::Services, config::Config};
 
-pub mod repository;
 pub mod service;
 
 pub struct App {

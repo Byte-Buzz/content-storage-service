@@ -1,4 +1,4 @@
-use crate::infrastructure::config::env::get_env_or;
+use super::env::get_env_or;
 
 /// S3 configuration.
 ///
