@@ -1,6 +1,9 @@
 [workspace]
 resolver = "3"
-members = ["crates/css-api"]
+members = [
+    "crates/css-api",
+    "crates/css-migrate",
+]
 
 [profile.dev]
 opt-level = 0
