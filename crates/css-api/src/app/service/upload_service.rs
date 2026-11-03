@@ -3,11 +3,8 @@ use rand::{TryRngCore, rngs::OsRng};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    app::repository::Repositories,
-    domain::{
-        errors::{self, ServiceError},
-        interfaces, models,
-    },
+    app::{repository::Repositories, service::error::ServiceError},
+    domain::{interfaces, models},
 };
 
 pub struct UploadService {
@@ -26,7 +23,7 @@ impl UploadService {
     pub async fn create(
         &self,
         upload: models::CreateNewUpload,
-    ) -> Result<models::Upload, errors::ServiceError> {
+    ) -> Result<models::Upload, ServiceError> {
         let app = self
             .app_repository
             .create_if_not_exists(&upload.app_name)
@@ -35,7 +32,7 @@ impl UploadService {
         let mut bytes = [0u8; 32];
 
         OsRng.try_fill_bytes(&mut bytes).map_err(|e| {
-            errors::ServiceError::Internal(format!("Failed to generate upload secret: {}", e))
+            ServiceError::Internal(format!("Failed to generate upload secret: {}", e))
         })?;
         let secret = BASE64_URL_SAFE_NO_PAD.encode(&bytes);
 
@@ -68,7 +65,7 @@ impl UploadService {
         &self,
         id: uuid::Uuid,
         secret: &str,
-    ) -> Result<models::Upload, errors::ServiceError> {
+    ) -> Result<models::Upload, ServiceError> {
         tracing::info!("checking upload");
         let upload = self.upload_repository.get_by_id(id).await?;
 

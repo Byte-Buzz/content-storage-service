@@ -1,7 +1,4 @@
-use actix_multipart::Field;
 use tokio::io::AsyncRead;
-
-use crate::domain::models::Upload;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct FileInfo {
@@ -56,11 +53,6 @@ pub struct CreateTempFile {
     pub content_type: String,
     pub app_id: i64,
     pub expires_at: Option<chrono::NaiveDateTime>,
-}
-
-pub struct UploadFile {
-    pub upload: Upload,
-    pub file: Field,
 }
 
 pub struct UploadFileRequest<'a> {

@@ -8,10 +8,10 @@ use actix_web::{
 use futures_util::StreamExt;
 
 use crate::{
-    app::service::Services,
-    domain::{
-        errors::{HttpError, HttpErrorBody, HttpErrorStatus},
-        models::{SecretQuery, UploadFile},
+    app::service::{Services, UploadFile},
+    transport::http::{
+        error::{HttpError, HttpErrorBody, HttpErrorStatus},
+        query::SecretQuery,
     },
 };
 

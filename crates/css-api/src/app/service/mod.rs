@@ -1,8 +1,12 @@
+pub mod error;
+
 mod file_service;
 mod upload_service;
 
 pub use file_service::FileService;
 pub use upload_service::UploadService;
+
+pub use file_service::UploadFile;
 
 use crate::app::repository;
 

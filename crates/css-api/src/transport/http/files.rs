@@ -8,8 +8,7 @@ use actix_web::{
 use tokio_util::io::ReaderStream;
 
 use crate::{
-    app::service::Services,
-    domain::models::{FileResponse, PresignedQuery},
+    app::service::Services, domain::models::FileResponse, transport::http::query::PresignedQuery,
 };
 
 #[get("/{app}/{file_id}")]
@@ -32,10 +31,7 @@ async fn get_file(
         actix_web::error::ErrorNotFound(e)
     })?;
 
-    let file = services
-        .file_service
-        .get_file(&app, id, e_tag, query.0)
-        .await?;
+    let file = services.file_service.get_file(&app, id, e_tag).await?;
 
     match file {
         FileResponse::File(file) => {

@@ -1,12 +1,13 @@
+use actix_multipart::Field;
 use futures_util::{StreamExt, TryStreamExt};
 use tokio_util::io::StreamReader;
 
 use crate::{
-    app::repository::Repositories,
+    app::{repository::Repositories, service::error::ServiceError},
     domain::{
-        errors::{RepositoryError, ServiceError},
+        errors::RepositoryError,
         interfaces,
-        models::{self, FileResponse, FileResponseFile, UploadFileRequest},
+        models::{self, FileResponse, FileResponseFile, Upload, UploadFileRequest},
     },
 };
 
@@ -15,6 +16,11 @@ pub struct FileService {
     app_repository: Box<dyn interfaces::AppInterface>,
     s3_repository: Box<dyn interfaces::S3Interface>,
     file_repository: Box<dyn interfaces::FileInterface>,
+}
+
+pub struct UploadFile {
+    pub upload: Upload,
+    pub file: Field,
 }
 
 impl FileService {
@@ -27,10 +33,7 @@ impl FileService {
         }
     }
 
-    pub async fn upload_file(
-        &self,
-        file: models::UploadFile,
-    ) -> Result<models::FileInfo, ServiceError> {
+    pub async fn upload_file(&self, file: UploadFile) -> Result<models::FileInfo, ServiceError> {
         let app = self.app_repository.get_by_id(file.upload.app_id).await?;
 
         let max_size = (file.upload.max_size as u32).min(self.s3_repository.max_file_size().await);
@@ -136,7 +139,6 @@ impl FileService {
         app: &str,
         file_id: uuid::Uuid,
         e_tag: Option<&str>,
-        _query: models::PresignedQuery,
     ) -> Result<FileResponse, ServiceError> {
         tracing::info!("get file");
         tracing::debug!("get file: {}/{}", app, file_id);
