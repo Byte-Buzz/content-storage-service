@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
 
-    let grpc_addr = app.config.get_grpc_address().parse()?;
+    let grpc_addr = app.config.grpc.address().parse()?;
     let grpc_router = transport::grpc::create_grpc_server(&app);
 
     let grpc = grpc_router.serve_with_shutdown(grpc_addr, async {
@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .app_data(web::Data::new(app.services.clone()))
             .configure(transport::http::create_http_server)
     })
-    .bind(app.config.get_http_address())?
+    .bind(app.config.server.address())?
     .shutdown_timeout(30)
     .run();
 
