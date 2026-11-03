@@ -3,7 +3,7 @@ use crate::infrastructure::config::env::get_env_or;
 /// S3 configuration.
 ///
 /// - CSS_S3_ENDPOINT: endpoint of the s3 server. Defaults to "http://localhost:9000".
-/// - CSS_S3_ACCESS_KEY: access key of the s3 server. Defaults to "rustfsadmin".
+/// - CSS_S3_ACCESS_KEY: access key of the s3 server. Required.
 /// - CSS_S3_SECRET_KEY: secret key of the s3 server. Required.
 /// - CSS_S3_TEMP_BUCKET: temporary bucket name of the s3 server. Defaults to "css-temp".
 /// - CSS_S3_BUCKET: bucket name of the s3 server. Defaults to "css".
@@ -20,7 +20,7 @@ impl S3Config {
     pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
         let config = Self {
             endpoint: get_env_or("S3_ENDPOINT", "http://localhost:9000"),
-            access_key: get_env_or("S3_ACCESS_KEY", "rustfsadmin"),
+            access_key: get_env_or("S3_ACCESS_KEY", ""),
             secret_key: get_env_or("S3_SECRET_KEY", ""),
             temp_bucket: get_env_or("S3_TEMP_BUCKET", "css-temp"),
             bucket: get_env_or("S3_BUCKET", "css"),
