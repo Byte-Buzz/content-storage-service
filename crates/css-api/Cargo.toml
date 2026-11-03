@@ -5,61 +5,49 @@ edition = "2024"
 
 [dependencies]
 # Web framework
-actix-web = "4.12.1"
-actix-multipart = "0.7.2"
+actix-web.workspace = true
+actix-multipart.workspace = true
+tracing-actix-web.workspace = true
 
 # gRPC
-tonic = "0.14.2"
-tonic-prost = "0.14.2"
-prost = "0.14.1"
-prost-types = "0.14.1"
+tonic.workspace = true
+tonic-prost.workspace = true
+prost.workspace = true
+prost-types.workspace = true
 
 # Async runtime
-tokio = { version = "1.48.0", features = [
-    "macros",
-    "rt-multi-thread",
-    "io-util",
-] }
-
-# Utilities
-tokio-util = { version = "0.7.17", features = ["io"] }
-futures-util = "0.3.31"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "io-util"] }
+tokio-util = { workspace = true, features = ["io"] }
+futures-util.workspace = true
 
 # Serialization
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.146"
+serde.workspace = true
+serde_json.workspace = true
 
 # S3
-aws-config = "1.8.12"
-aws-sdk-s3 = "1.119.0"
+aws-config.workspace = true
+aws-sdk-s3.workspace = true
 
 # Database
-sqlx = { version = "0.8.6", features = [
-    "runtime-tokio-rustls",
-    "postgres",
-    "macros",
-    "chrono",
-    "uuid",
-] }
+sqlx = { workspace = true, features = ["chrono", "uuid", "json"] }
 
 # Error handling
-thiserror = "2.0.17"
+thiserror.workspace = true
 
 # Tools
-uuid = { version = "1.4.1", features = ["v4"] }
-chrono = "0.4.31"
-async-trait = "*"
-base64 = "0.22.1"
-rand = "0.9.2"
-hex = "0.4.3"
-sha2 = "0.10.9"
-subtle = "2.6.1"
+uuid = { workspace = true, features = ["v4"] }
+chrono.workspace = true
+async-trait.workspace = true
+base64.workspace = true
+rand.workspace = true
+hex.workspace = true
+sha2.workspace = true
+subtle.workspace = true
 
 # Logging
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
-tracing-log = "0.2"
-tracing-actix-web = "0.7"
+tracing.workspace = true
+tracing-subscriber.workspace = true
+tracing-log.workspace = true
 
 [build-dependencies]
-tonic-prost-build = "0.14.2"
+tonic-prost-build.workspace = true
