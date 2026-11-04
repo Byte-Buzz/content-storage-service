@@ -61,33 +61,6 @@ impl UploadService {
 
         Ok(upload)
     }
-
-    pub async fn check_upload(
-        &self,
-        id: uuid::Uuid,
-        secret: &str,
-    ) -> Result<models::Upload, ServiceError> {
-        tracing::info!("checking upload");
-        let upload = self.upload_repository.get_by_id(id).await?;
-
-        tracing::debug!("upload: {:#?}", upload);
-
-        if upload.expires_at < chrono::Utc::now().naive_utc() {
-            return Err(ServiceError::Forbidden);
-        }
-
-        let hash = Sha256::digest(secret.as_bytes());
-        let provided_hash = hex::encode(hash);
-
-        if subtle::ConstantTimeEq::ct_eq(upload.secret.as_bytes(), provided_hash.as_bytes()).into()
-        {
-            tracing::info!("upload secret matches");
-            Ok(upload)
-        } else {
-            tracing::info!("upload secret does not match");
-            Err(ServiceError::Forbidden)
-        }
-    }
 }
 
 impl Clone for UploadService {

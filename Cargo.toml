@@ -10,7 +10,6 @@ css-core = { path = "crates/css-core" }
 
 # Web framework
 actix-web = "4.12.1"
-actix-multipart = "0.7.2"
 tracing-actix-web = "0.7"
 
 # gRPC
@@ -22,8 +21,6 @@ prost-types = "0.14.1"
 
 # Async runtime
 tokio = "1.48.0"
-tokio-util = "0.7.17"
-futures-util = "0.3.31"
 
 # Serialization
 serde = { version = "1.0.228", features = ["derive"] }
@@ -51,7 +48,6 @@ base64 = "0.22.1"
 rand = "0.9.2"
 hex = "0.4.3"
 sha2 = "0.10.9"
-subtle = "2.6.1"
 
 # Logging
 tracing = "0.1"

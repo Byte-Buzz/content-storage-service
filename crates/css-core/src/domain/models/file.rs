@@ -1,11 +1,3 @@
-use tokio::io::AsyncRead;
-
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct FileInfo {
-    pub key: String,
-    pub filename: String,
-}
-
 #[derive(Debug, Clone, sqlx::FromRow, Default)]
 pub struct File {
     pub id: uuid::Uuid,
@@ -53,32 +45,6 @@ pub struct CreateTempFile {
     pub content_type: String,
     pub app_id: i64,
     pub expires_at: Option<chrono::NaiveDateTime>,
-}
-
-pub struct UploadFileRequest<'a> {
-    pub id: uuid::Uuid,
-    pub key: String,
-    pub file: &'a mut (dyn AsyncRead + Unpin),
-    pub content_type: String,
-}
-
-pub enum FileResponse {
-    File(FileResponseFile),
-    NotModified,
-}
-
-impl From<FileResponseFile> for FileResponse {
-    fn from(value: FileResponseFile) -> Self {
-        FileResponse::File(value)
-    }
-}
-
-pub struct FileResponseFile {
-    pub file: Box<dyn AsyncRead + Unpin>,
-    pub content_type: String,
-    pub filename: String,
-    pub e_tag: String,
-    pub size: Option<u32>,
 }
 
 pub struct FileSettings {

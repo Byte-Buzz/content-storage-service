@@ -7,8 +7,6 @@ use css_core::repository;
 pub use file_service::FileService;
 pub use upload_service::UploadService;
 
-pub use file_service::UploadFile;
-
 #[derive(Clone)]
 pub struct Services {
     pub upload_service: UploadService,

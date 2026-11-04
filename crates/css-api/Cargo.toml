@@ -8,7 +8,6 @@ css-core.workspace = true
 
 # Web framework
 actix-web.workspace = true
-actix-multipart.workspace = true
 tracing-actix-web.workspace = true
 
 # gRPC
@@ -19,8 +18,6 @@ prost-types.workspace = true
 
 # Async runtime
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "io-util"] }
-tokio-util = { workspace = true, features = ["io"] }
-futures-util.workspace = true
 
 # Serialization
 serde.workspace = true
@@ -44,7 +41,6 @@ base64.workspace = true
 rand.workspace = true
 hex.workspace = true
 sha2.workspace = true
-subtle.workspace = true
 
 # Logging
 tracing.workspace = true
