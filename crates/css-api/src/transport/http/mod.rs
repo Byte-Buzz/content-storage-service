@@ -1,3 +1,12 @@
-use actix_web::web;
+use axum::{Router, routing::get};
 
-pub fn create_http_server(cfg: &mut web::ServiceConfig) {}
+mod check;
+
+pub use check::CheckState;
+
+pub fn create_http_server(services: CheckState) -> Router {
+    Router::new()
+        .route("/health", get(check::health))
+        .route("/ready", get(check::ready))
+        .with_state(services)
+}

@@ -9,8 +9,7 @@ members = [
 css-core = { path = "crates/css-core" }
 
 # Web framework
-actix-web = "4.12.1"
-tracing-actix-web = "0.7"
+axum = "0.8.9"
 
 # gRPC
 tonic = "0.14.2"

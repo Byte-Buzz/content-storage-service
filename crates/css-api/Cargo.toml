@@ -7,8 +7,7 @@ edition = "2024"
 css-core.workspace = true
 
 # Web framework
-actix-web.workspace = true
-tracing-actix-web.workspace = true
+axum.workspace = true
 
 # gRPC
 tonic.workspace = true
@@ -17,7 +16,7 @@ prost.workspace = true
 prost-types.workspace = true
 
 # Async runtime
-tokio = { workspace = true, features = ["macros", "rt-multi-thread", "io-util"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal", "net", "time", "sync"] }
 
 # Serialization
 serde.workspace = true
