@@ -1,12 +1,10 @@
-use chrono::Days;
-
 use crate::{
-    repository::map_sqlx_error,
     domain::{
         errors::RepositoryError,
         interfaces::UploadInterface,
-        models::{self, CreateUpload, Upload},
+        models::{self, CreateUpload, ProcessingTask, Upload},
     },
+    repository::map_sqlx_error,
 };
 
 pub struct UploadRepository {
@@ -26,24 +24,23 @@ impl UploadInterface for UploadRepository {
         sqlx::query_as!(
             models::Upload,
             r#"
-                INSERT INTO uploads (id, app_id, filename, content_type, max_size, settings,
-                    info, secret, access, expires_at)
+                INSERT INTO uploads (id, app_id, content_type, accepted_content_types, max_size,
+                    max_duration_seconds, tasks, external_tasks, info, expires_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                RETURNING id, app_id, filename, content_type, max_size, settings, info,
-                    secret, access as "access!: _", created_at, expires_at
+                RETURNING id, app_id, content_type, accepted_content_types, max_size,
+                    max_duration_seconds, tasks as "tasks!: _", external_tasks, info,
+                    created_at, expires_at
             "#,
             upload.id,
             upload.app_id,
-            upload.filename,
             upload.content_type,
+            &upload.accepted_content_types,
             upload.max_size,
-            upload.settings.unwrap_or(0),
+            upload.max_duration_seconds,
+            &upload.tasks as &[ProcessingTask],
+            &upload.external_tasks,
             upload.info,
-            upload.secret,
-            upload.access as _,
-            upload
-                .expires_at
-                .unwrap_or(chrono::Utc::now().naive_utc() + Days::new(1)),
+            upload.expires_at,
         )
         .fetch_one(&self.pool)
         .await
@@ -67,9 +64,9 @@ impl UploadInterface for UploadRepository {
         sqlx::query_as!(
             Upload,
             r#"
-                SELECT id, app_id, filename, content_type, max_size, settings, info,
-                    secret, access as "access!: _",
-                    created_at, expires_at
+                SELECT id, app_id, content_type, accepted_content_types, max_size,
+                    max_duration_seconds, tasks as "tasks!: _", external_tasks,
+                    info, created_at, expires_at
                 FROM uploads
                 WHERE id = $1
             "#,
