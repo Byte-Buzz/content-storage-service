@@ -5,6 +5,7 @@ use super::env::get_env_or;
 /// - CSS_S3_ENDPOINT: endpoint of the s3 server. Defaults to "http://localhost:9000".
 /// - CSS_S3_ACCESS_KEY: access key of the s3 server. Required.
 /// - CSS_S3_SECRET_KEY: secret key of the s3 server. Required.
+/// - CSS_S3_REGION: region of the s3 server. Defaults to "us-east-1".
 /// - CSS_S3_TEMP_BUCKET: temporary bucket name of the s3 server. Defaults to "css-temp".
 /// - CSS_S3_BUCKET: bucket name of the s3 server. Defaults to "css".
 #[derive(Debug, Clone)]
@@ -12,6 +13,7 @@ pub struct S3Config {
     pub endpoint: String,
     pub access_key: String,
     pub secret_key: String,
+    pub region: String,
     pub temp_bucket: String,
     pub bucket: String,
 }
@@ -22,6 +24,7 @@ impl S3Config {
             endpoint: get_env_or("S3_ENDPOINT", "http://localhost:9000"),
             access_key: get_env_or("S3_ACCESS_KEY", ""),
             secret_key: get_env_or("S3_SECRET_KEY", ""),
+            region: get_env_or("S3_REGION", "us-east-1"),
             temp_bucket: get_env_or("S3_TEMP_BUCKET", "css-temp"),
             bucket: get_env_or("S3_BUCKET", "css"),
         };
@@ -42,6 +45,10 @@ impl S3Config {
 
         if self.secret_key.trim().is_empty() {
             return Err("CSS_S3_SECRET_KEY is required".to_string());
+        }
+
+        if self.region.trim().is_empty() {
+            return Err("CSS_S3_REGION cannot be empty".to_string());
         }
 
         if self.temp_bucket.trim().is_empty() {
