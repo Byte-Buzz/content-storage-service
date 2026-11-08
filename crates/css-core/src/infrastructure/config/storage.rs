@@ -1,7 +1,10 @@
+use std::fmt::Debug;
+
 use super::env::get_env_or;
 
 /// S3 configuration.
 ///
+/// - CSS_S3_PUBLIC_ENDPOINT: public endpoint of the s3 server. Defaults from CSS_S3_ENDPOINT.
 /// - CSS_S3_ENDPOINT: endpoint of the s3 server. Defaults to "http://localhost:9000".
 /// - CSS_S3_ACCESS_KEY: access key of the s3 server. Required.
 /// - CSS_S3_SECRET_KEY: secret key of the s3 server. Required.
@@ -10,21 +13,37 @@ use super::env::get_env_or;
 /// - CSS_S3_BUCKET: bucket name of the s3 server. Defaults to "css".
 #[derive(Debug, Clone)]
 pub struct S3Config {
+    pub public_endpoint: String,
     pub endpoint: String,
-    pub access_key: String,
-    pub secret_key: String,
-    pub region: String,
+    pub credentials: SigningCredentials,
     pub temp_bucket: String,
     pub bucket: String,
 }
 
+#[derive(Clone)]
+pub struct SigningCredentials {
+    pub access_key: String,
+    pub secret_key: String,
+    pub region: String,
+}
+
+impl Debug for SigningCredentials {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("SigningCredentials { .. }")
+    }
+}
+
 impl S3Config {
     pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
+        let endpoint = get_env_or("S3_ENDPOINT", "http://localhost:9000");
         let config = Self {
-            endpoint: get_env_or("S3_ENDPOINT", "http://localhost:9000"),
-            access_key: get_env_or("S3_ACCESS_KEY", ""),
-            secret_key: get_env_or("S3_SECRET_KEY", ""),
-            region: get_env_or("S3_REGION", "us-east-1"),
+            public_endpoint: get_env_or("S3_PUBLIC_ENDPOINT", &endpoint),
+            endpoint,
+            credentials: SigningCredentials {
+                access_key: get_env_or("S3_ACCESS_KEY", ""),
+                secret_key: get_env_or("S3_SECRET_KEY", ""),
+                region: get_env_or("S3_REGION", "us-east-1"),
+            },
             temp_bucket: get_env_or("S3_TEMP_BUCKET", "css-temp"),
             bucket: get_env_or("S3_BUCKET", "css"),
         };
@@ -35,19 +54,23 @@ impl S3Config {
     }
 
     fn validate(&self) -> Result<(), String> {
+        if self.public_endpoint.trim().is_empty() {
+            return Err("CSS_S3_PUBLIC_ENDPOINT cannot be empty".to_string());
+        }
+
         if self.endpoint.trim().is_empty() {
             return Err("CSS_S3_ENDPOINT cannot be empty".to_string());
         }
 
-        if self.access_key.trim().is_empty() {
+        if self.credentials.access_key.trim().is_empty() {
             return Err("CSS_S3_ACCESS_KEY is required".to_string());
         }
 
-        if self.secret_key.trim().is_empty() {
+        if self.credentials.secret_key.trim().is_empty() {
             return Err("CSS_S3_SECRET_KEY is required".to_string());
         }
 
-        if self.region.trim().is_empty() {
+        if self.credentials.region.trim().is_empty() {
             return Err("CSS_S3_REGION cannot be empty".to_string());
         }
 

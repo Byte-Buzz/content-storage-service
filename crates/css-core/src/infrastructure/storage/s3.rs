@@ -11,14 +11,14 @@ use crate::infrastructure::{config::S3Config, storage::S3Client};
 pub async fn create_s3_client(config: &S3Config) -> S3Client {
     let shared = aws_config::defaults(BehaviorVersion::latest())
         .credentials_provider(Credentials::new(
-            config.access_key.clone(),
-            config.secret_key.clone(),
+            config.credentials.access_key.clone(),
+            config.credentials.secret_key.clone(),
             None,
             None,
             "rustfs",
         ))
         .endpoint_url(config.endpoint.clone())
-        .region(Region::new(config.region.clone()))
+        .region(Region::new(config.credentials.region.clone()))
         .load()
         .await;
 
