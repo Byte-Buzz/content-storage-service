@@ -1,5 +1,8 @@
-use sqlx::postgres::PgPoolOptions;
+use css_core::infrastructure::config::{DatabaseConfig, S3Config};
 use tracing_subscriber::EnvFilter;
+
+mod db;
+mod storage;
 
 static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("../../migrations");
 
@@ -9,17 +12,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
         .init();
 
-    let url = std::env::var("CSS_DATABASE_URL").map_err(|_| "CSS_DATABASE_URL is not set")?;
+    let cmd = std::env::args().nth(1);
+    let (db, storage) = match cmd {
+        Some(cmd) => match cmd.as_str() {
+            "db" => (Some(DatabaseConfig::from_env()?), None),
+            "storage" => (None, Some(S3Config::from_env()?)),
+            _ => return Err("usage: css-migrate [db|storage]".into()),
+        },
+        None => (
+            Some(DatabaseConfig::from_env()?),
+            Some(S3Config::from_env()?),
+        ),
+    };
 
-    let pool = PgPoolOptions::new()
-        .max_connections(1)
-        .connect(&url)
-        .await?;
+    if let Some(config) = db {
+        db::run_db(config).await?;
+    }
 
-    tracing::info!(available = MIGRATOR.iter().count(), "running migrations");
-    MIGRATOR.run(&pool).await?;
-    tracing::info!("migrations are up to date");
+    if let Some(config) = storage {
+        storage::run_storage(config).await?;
+    }
 
-    pool.close().await;
     Ok(())
 }

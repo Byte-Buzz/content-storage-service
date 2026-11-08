@@ -920,6 +920,9 @@ dependencies = [
 name = "css-migrate"
 version = "0.1.0"
 dependencies = [
+ "aws-sdk-s3",
+ "css-core",
+ "serde_json",
  "sqlx",
  "tokio",
  "tracing",
