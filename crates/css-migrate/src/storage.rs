@@ -1,8 +1,9 @@
 use aws_sdk_s3::types::{
     Event, ExpirationStatus,
     builders::{
-        BucketLifecycleConfigurationBuilder, LifecycleExpirationBuilder, LifecycleRuleBuilder,
-        LifecycleRuleFilterBuilder, NotificationConfigurationBuilder, QueueConfigurationBuilder,
+        BucketLifecycleConfigurationBuilder, CorsConfigurationBuilder, CorsRuleBuilder,
+        LifecycleExpirationBuilder, LifecycleRuleBuilder, LifecycleRuleFilterBuilder,
+        NotificationConfigurationBuilder, QueueConfigurationBuilder,
     },
 };
 use css_core::infrastructure::{
@@ -43,7 +44,7 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
 
     ensure_bucket(&client, &config.temp_bucket).await?;
 
-    tracing::info!(bucket = %&config.temp_bucket, "creating lifecycle configuration");
+    tracing::info!(bucket = %config.temp_bucket, "creating lifecycle configuration");
 
     client
         .put_bucket_lifecycle_configuration()
@@ -88,6 +89,29 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
             .send()
             .await?;
     }
+
+    tracing::info!(bucket = %config.temp_bucket, "creating cors settings");
+
+    if config.cors_origins.iter().any(|o| o == "*") {
+        tracing::warn!("cors allows any origin, set CSS_S3_CORS_ORIGINS in production");
+    }
+    client
+        .put_bucket_cors()
+        .bucket(&config.temp_bucket)
+        .cors_configuration(
+            CorsConfigurationBuilder::default()
+                .cors_rules(
+                    CorsRuleBuilder::default()
+                        .allowed_methods("POST")
+                        .allowed_headers("*")
+                        .set_allowed_origins(Some(config.cors_origins))
+                        .max_age_seconds(3600)
+                        .build()?,
+                )
+                .build()?,
+        )
+        .send()
+        .await?;
 
     Ok(())
 }
