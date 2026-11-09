@@ -21,10 +21,10 @@ impl App {
         Self {
             s3_client,
             pg_pool,
-            config,
+            config: config.clone(),
 
             repositories: repository.clone(),
-            services: Services::new(repository),
+            services: Services::new(repository, config),
         }
     }
 }

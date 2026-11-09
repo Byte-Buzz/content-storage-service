@@ -1,6 +1,6 @@
-use chrono::Utc;
+use std::collections::HashMap;
 
-use crate::domain::models::file::FileVisibility;
+use chrono::Utc;
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Upload {
@@ -39,13 +39,22 @@ pub struct CreateUpload {
 }
 
 #[derive(Debug, Clone)]
-pub struct CreateNewUpload {
+pub struct UploadRequest {
     pub app_name: String,
-    pub filename: String,
-    pub settings: Option<i32>,
     pub content_type: String,
-    pub max_size: u32,
-    pub info: serde_json::Value,
-    pub upload_url_ttl: Option<u32>,
-    pub access: FileVisibility,
+    pub accepted_content_types: Vec<String>,
+    pub max_size: u64,
+    pub max_duration_seconds: Option<u32>,
+    pub tasks: Vec<ProcessingTask>,
+    pub external_tasks: Vec<String>,
+    pub info: Option<Vec<u8>>,
+    pub upload_url_ttl: Option<std::time::Duration>,
+}
+
+#[derive(Debug, Clone)]
+pub struct UploadResponse {
+    pub file_id: uuid::Uuid,
+    pub upload_url: String,
+    pub form_fields: HashMap<String, String>,
+    pub expires_at: chrono::DateTime<Utc>,
 }
