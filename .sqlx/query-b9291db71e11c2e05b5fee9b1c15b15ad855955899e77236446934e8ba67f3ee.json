@@ -1,0 +1,99 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id, app_id, content_type, accepted_content_types, max_size,\n                    max_duration_seconds, tasks as \"tasks!: _\", external_tasks,\n                    info, created_at, expires_at\n                FROM uploads\n                WHERE id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "app_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "content_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "accepted_content_types",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_size",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "max_duration_seconds",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "tasks!: _",
+        "type_info": {
+          "Custom": {
+            "name": "processing_task[]",
+            "kind": {
+              "Array": {
+                "Custom": {
+                  "name": "processing_task",
+                  "kind": {
+                    "Enum": [
+                      "thumbnails",
+                      "frames"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "external_tasks",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 8,
+        "name": "info",
+        "type_info": "Bytea"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "expires_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "b9291db71e11c2e05b5fee9b1c15b15ad855955899e77236446934e8ba67f3ee"
+}

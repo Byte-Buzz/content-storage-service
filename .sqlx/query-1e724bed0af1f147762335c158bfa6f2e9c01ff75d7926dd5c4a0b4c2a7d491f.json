@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id, app_id, content_type, variants,\n                    visibility as \"visibility!: _\",\n                    visibility_version, created_at\n                FROM files\n                WHERE id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "app_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "content_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "variants",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "visibility!: _",
+        "type_info": {
+          "Custom": {
+            "name": "file_visibility",
+            "kind": {
+              "Enum": [
+                "private",
+                "public"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "visibility_version",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1e724bed0af1f147762335c158bfa6f2e9c01ff75d7926dd5c4a0b4c2a7d491f"
+}
