@@ -45,6 +45,7 @@ uuid = "1.4.1"
 chrono = "0.4.31"
 async-trait = "0.1"
 base64 = "0.23.1"
+percent-encoding = "2.3.2"
 
 # Logging
 tracing = "0.1"

@@ -13,7 +13,7 @@ use css_core::infrastructure::{
 use serde_json::json;
 
 pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Error>> {
-    let client = create_s3_client(&config).await;
+    let client = create_s3_client(&config, config.endpoint.clone()).await;
 
     tracing::info!(bucket = %config.bucket, "creating bucket");
 

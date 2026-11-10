@@ -14,3 +14,23 @@ pub struct PresignedPost {
     pub fields: HashMap<String, String>,
     pub expires_at: DateTime<Utc>,
 }
+
+pub struct DownloadUrlRequest {
+    pub file_id: uuid::Uuid,
+    pub variant: Option<String>,
+    pub download_name: Option<String>,
+}
+
+pub struct PresignedGetRequest {
+    pub key: String,
+    pub download_name: Option<String>,
+    pub signed_at: DateTime<Utc>,
+    pub expires_in: std::time::Duration,
+}
+
+pub struct PresignedGet {
+    pub file_id: uuid::Uuid,
+    pub variant: Option<String>,
+    pub url: String,
+    pub expires_at: DateTime<Utc>,
+}

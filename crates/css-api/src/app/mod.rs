@@ -15,8 +15,18 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(s3_client: Client, pg_pool: sqlx::PgPool, config: Config) -> Self {
-        let repository = Repositories::new(pg_pool.clone(), s3_client.clone(), &config.s3);
+    pub fn new(
+        s3_client: Client,
+        presign_s3_client: Client,
+        pg_pool: sqlx::PgPool,
+        config: Config,
+    ) -> Self {
+        let repository = Repositories::new(
+            pg_pool.clone(),
+            s3_client.clone(),
+            presign_s3_client,
+            &config.s3,
+        );
 
         Self {
             s3_client,

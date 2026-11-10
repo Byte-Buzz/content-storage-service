@@ -1,6 +1,8 @@
-use crate::transport::grpc::convert::status_from_service_error;
 use crate::{
-    app::{App, service::UploadService},
+    app::{
+        App,
+        service::{FileService, UploadService},
+    },
     transport::grpc::{
         content::content_storage::content_storage_service_server::{
             ContentStorageService, ContentStorageServiceServer,
@@ -15,12 +17,14 @@ pub mod content_storage {
 
 pub struct ContentServiceGrpcHandler {
     uploads_service: UploadService,
+    file_service: FileService,
 }
 
 impl ContentServiceGrpcHandler {
     pub fn new(app: &App) -> Self {
         Self {
             uploads_service: app.services.upload_service.clone(),
+            file_service: app.services.file_service.clone(),
         }
     }
 }
@@ -48,7 +52,27 @@ impl ContentStorageService for ContentServiceGrpcHandler {
         &self,
         request: tonic::Request<content_storage::GetDownloadUrlsRequest>,
     ) -> Result<tonic::Response<content_storage::GetDownloadUrlsResponse>, tonic::Status> {
-        Err(tonic::Status::unimplemented("Not implemented"))
+        let req = request
+            .into_inner()
+            .items
+            .into_iter()
+            .map(convert::download_request_from_proto)
+            .collect::<Result<Vec<_>, tonic::Status>>()?;
+
+        let urls = self
+            .file_service
+            .get_download_urls(req)
+            .await
+            .map_err(convert::status_from_service_error)?;
+
+        Ok(tonic::Response::new(
+            content_storage::GetDownloadUrlsResponse {
+                urls: urls
+                    .into_iter()
+                    .map(convert::download_response_to_proto)
+                    .collect::<Vec<_>>(),
+            },
+        ))
     }
 }
 

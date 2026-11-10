@@ -8,7 +8,7 @@ use crate::infrastructure::{config::S3Config, storage::S3Client};
 /// This function takes an S3 configuration and returns an S3 client.
 /// The client is created using the AWS SDK defaults, with the given
 /// configuration overriding the default endpoint URL and credentials.
-pub async fn create_s3_client(config: &S3Config) -> S3Client {
+pub async fn create_s3_client(config: &S3Config, endpoint_url: String) -> S3Client {
     let shared = aws_config::defaults(BehaviorVersion::latest())
         .credentials_provider(Credentials::new(
             config.credentials.access_key.clone(),
@@ -17,7 +17,7 @@ pub async fn create_s3_client(config: &S3Config) -> S3Client {
             None,
             "rustfs",
         ))
-        .endpoint_url(config.endpoint.clone())
+        .endpoint_url(endpoint_url)
         .region(Region::new(config.credentials.region.clone()))
         .load()
         .await;

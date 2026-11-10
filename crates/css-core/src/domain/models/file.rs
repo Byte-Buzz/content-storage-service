@@ -26,3 +26,12 @@ pub struct CreateFile {
     pub content_type: String,
     pub variants: Vec<String>,
 }
+
+#[derive(Debug, Clone, Default)]
+pub struct FileForDownload {
+    pub id: uuid::Uuid,
+    pub app_id: i64,
+    pub app_name: String,
+    pub content_type: String,
+    pub variants: Vec<String>,
+}

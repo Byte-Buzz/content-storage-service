@@ -19,11 +19,12 @@ async fn main() -> Result<(), BoxError> {
     init_tracing();
 
     let config = Config::from_env()?;
-    let s3_client = create_s3_client(&config.s3).await;
+    let s3_client = create_s3_client(&config.s3, config.s3.endpoint.clone()).await;
+    let presign_s3_client = create_s3_client(&config.s3, config.s3.public_endpoint.clone()).await;
 
     let pg_pool = create_pg_pool(&config.database).await?;
 
-    let app = app::App::new(s3_client, pg_pool, config.clone());
+    let app = app::App::new(s3_client, presign_s3_client, pg_pool, config.clone());
 
     let grpc_addr = app.config.grpc.address().parse()?;
     let grpc_router = transport::grpc::create_grpc_server(&app);

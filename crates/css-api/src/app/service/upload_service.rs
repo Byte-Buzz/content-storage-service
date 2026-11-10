@@ -1,7 +1,5 @@
-use std::time::Duration;
-
 use css_core::{
-    domain::{interfaces, models},
+    domain::{interfaces, models, storage_keys},
     repository::Repositories,
 };
 
@@ -134,7 +132,7 @@ impl UploadService {
         let presigned_post =
             self.s3_repository
                 .create_presigned_post(models::PresignedPostRequest {
-                    key: format!("{}/{}", app.name, id),
+                    key: storage_keys::temp_key(&app.name, id),
                     content_type: stored.content_type,
                     max_size: max_size as u64,
                     expires_at,

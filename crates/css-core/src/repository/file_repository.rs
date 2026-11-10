@@ -33,6 +33,25 @@ impl FileInterface for FileRepository {
         .map_err(map_sqlx_error)
     }
 
+    async fn get_by_ids_with_app(
+        &self,
+        ids: Vec<uuid::Uuid>,
+    ) -> Result<Vec<models::FileForDownload>, RepositoryError> {
+        sqlx::query_as!(
+            models::FileForDownload,
+            r#"
+                SELECT f.id, f.app_id, a.name AS app_name,
+                    f.content_type, f.variants
+                FROM files f JOIN app a ON a.id = f.app_id
+                WHERE f.id = ANY($1)
+            "#,
+            &ids
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(map_sqlx_error)
+    }
+
     fn clone_box(&self) -> Box<dyn FileInterface + Send + Sync> {
         Box::new(FileRepository {
             pool: self.pool.clone(),

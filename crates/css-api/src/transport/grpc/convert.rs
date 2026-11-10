@@ -48,6 +48,28 @@ pub fn upload_response_to_proto(res: models::UploadResponse) -> pb::CreateUpload
     }
 }
 
+pub fn download_request_from_proto(
+    req: pb::DownloadUrlRequest,
+) -> Result<models::DownloadUrlRequest, tonic::Status> {
+    let id = uuid::Uuid::try_parse(&req.file_id)
+        .map_err(|_| tonic::Status::invalid_argument("invalid file_id"))?;
+
+    Ok(models::DownloadUrlRequest {
+        file_id: id,
+        download_name: req.download_name,
+        variant: req.variant,
+    })
+}
+
+pub fn download_response_to_proto(res: models::PresignedGet) -> pb::DownloadUrl {
+    pb::DownloadUrl {
+        file_id: res.file_id.to_string(),
+        url: res.url,
+        variant: res.variant,
+        expires_at: Some(SystemTime::from(res.expires_at).into()),
+    }
+}
+
 pub fn status_from_service_error(error: ServiceError) -> tonic::Status {
     match error {
         ServiceError::InvalidArgument(message) => tonic::Status::invalid_argument(message),
