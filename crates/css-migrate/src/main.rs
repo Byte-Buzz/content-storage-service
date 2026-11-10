@@ -1,6 +1,9 @@
 use css_core::infrastructure::config::{DatabaseConfig, S3Config};
 use tracing_subscriber::EnvFilter;
 
+use crate::config::StorageSetupConfig;
+
+mod config;
 mod db;
 mod storage;
 
@@ -16,12 +19,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (db, storage) = match cmd {
         Some(cmd) => match cmd.as_str() {
             "db" => (Some(DatabaseConfig::from_env()?), None),
-            "storage" => (None, Some(S3Config::from_env()?)),
+            "storage" => (
+                None,
+                Some((S3Config::from_env()?, StorageSetupConfig::from_env()?)),
+            ),
             _ => return Err("usage: css-migrate [db|storage]".into()),
         },
         None => (
             Some(DatabaseConfig::from_env()?),
-            Some(S3Config::from_env()?),
+            Some((S3Config::from_env()?, StorageSetupConfig::from_env()?)),
         ),
     };
 
@@ -29,8 +35,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         db::run_db(config).await?;
     }
 
-    if let Some(config) = storage {
-        storage::run_storage(config).await?;
+    if let Some((config, setup)) = storage {
+        storage::run_storage(config, setup).await?;
     }
 
     Ok(())

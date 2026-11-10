@@ -12,7 +12,12 @@ use css_core::infrastructure::{
 };
 use serde_json::json;
 
-pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Error>> {
+use crate::config::StorageSetupConfig;
+
+pub async fn run_storage(
+    config: S3Config,
+    setup: StorageSetupConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
     let client = create_s3_client(&config, config.endpoint.clone()).await;
 
     tracing::info!(bucket = %config.bucket, "creating bucket");
@@ -57,7 +62,7 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
                         .filter(LifecycleRuleFilterBuilder::default().build())
                         .expiration(
                             LifecycleExpirationBuilder::default()
-                                .days(config.temp_ttl_days)
+                                .days(setup.temp_ttl_days)
                                 .build(),
                         )
                         .status(ExpirationStatus::Enabled)
@@ -70,7 +75,7 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
 
     tracing::info!(bucket = %config.temp_bucket, "creating upload notification settings");
 
-    if config.notify_arn.trim().is_empty() {
+    if setup.notify_arn.trim().is_empty() {
         tracing::warn!("no notify arn configured, skipping notification setup");
     } else {
         client
@@ -80,7 +85,7 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
                 NotificationConfigurationBuilder::default()
                     .queue_configurations(
                         QueueConfigurationBuilder::default()
-                            .queue_arn(config.notify_arn)
+                            .queue_arn(setup.notify_arn)
                             .events(Event::S3ObjectCreated)
                             .build()?,
                     )
@@ -92,7 +97,7 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
 
     tracing::info!(bucket = %config.temp_bucket, "creating cors settings");
 
-    if config.cors_origins.iter().any(|o| o == "*") {
+    if setup.cors_origins.iter().any(|o| o == "*") {
         tracing::warn!("cors allows any origin, set CSS_S3_CORS_ORIGINS in production");
     }
     client
@@ -104,7 +109,7 @@ pub async fn run_storage(config: S3Config) -> Result<(), Box<dyn std::error::Err
                     CorsRuleBuilder::default()
                         .allowed_methods("POST")
                         .allowed_headers("*")
-                        .set_allowed_origins(Some(config.cors_origins))
+                        .set_allowed_origins(Some(setup.cors_origins))
                         .max_age_seconds(3600)
                         .build()?,
                 )
