@@ -1,6 +1,7 @@
 use chrono::Utc;
 
-#[derive(Debug, Clone, sqlx::FromRow, Default)]
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "db", derive(sqlx::FromRow))]
 pub struct File {
     pub id: uuid::Uuid,
     pub app_id: i64,
@@ -11,8 +12,12 @@ pub struct File {
     pub created_at: chrono::DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Default, sqlx::Type)]
-#[sqlx(type_name = "file_visibility", rename_all = "snake_case")]
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "db", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "db",
+    sqlx(type_name = "file_visibility", rename_all = "snake_case")
+)]
 pub enum FileVisibility {
     #[default]
     Private,

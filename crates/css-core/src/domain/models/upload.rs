@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use chrono::Utc;
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "db", derive(sqlx::FromRow))]
 pub struct Upload {
     pub id: uuid::Uuid,
     pub app_id: i64,
@@ -17,8 +18,12 @@ pub struct Upload {
     pub expires_at: chrono::DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, sqlx::Type)]
-#[sqlx(type_name = "processing_task", rename_all = "snake_case")]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "db", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "db",
+    sqlx(type_name = "processing_task", rename_all = "snake_case")
+)]
 pub enum ProcessingTask {
     Thumbnails,
     Frames,

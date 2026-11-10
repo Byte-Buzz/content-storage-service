@@ -7,7 +7,7 @@ edition = "2024"
 ignored = ["prost", "prost-types", "tonic-prost"]
 
 [dependencies]
-css-core.workspace = true
+css-core = { workspace = true, features = ["db"] }
 
 # Web framework
 axum.workspace = true
