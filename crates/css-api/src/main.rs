@@ -24,7 +24,12 @@ async fn main() -> Result<(), BoxError> {
 
     let pg_pool = create_pg_pool(&config.database).await?;
 
-    let app = app::App::new(s3_client, presign_s3_client, pg_pool, config.clone());
+    let app = app::App::new(
+        s3_client.clone(),
+        presign_s3_client,
+        pg_pool.clone(),
+        config.clone(),
+    );
 
     let grpc_addr = app.config.grpc.address().parse()?;
     let grpc_router = transport::grpc::create_grpc_server(&app);
@@ -37,8 +42,8 @@ async fn main() -> Result<(), BoxError> {
     });
 
     let state = transport::http::CheckState {
-        pg_pool: app.pg_pool.clone(),
-        s3_client: app.s3_client.clone(),
+        pg_pool,
+        s3_client,
         buckets: vec![
             app.config.s3.bucket.clone(),
             app.config.s3.temp_bucket.clone(),

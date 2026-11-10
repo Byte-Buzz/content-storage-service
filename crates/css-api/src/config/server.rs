@@ -12,7 +12,7 @@ pub struct ServerConfig {
 
 impl ServerConfig {
     pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
-        let mut config = Self {
+        let config = Self {
             host: get_env_or("SERVER_HOST", "0.0.0.0"),
             port: get_env_or("SERVER_PORT", "8080").parse()?,
         };

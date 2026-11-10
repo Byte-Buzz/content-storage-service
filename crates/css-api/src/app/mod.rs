@@ -6,11 +6,8 @@ use crate::{app::service::Services, config::Config};
 pub mod service;
 
 pub struct App {
-    pub s3_client: Client,
-    pub pg_pool: sqlx::PgPool,
     pub config: Config,
 
-    pub repositories: Repositories,
     pub services: Services,
 }
 
@@ -29,11 +26,8 @@ impl App {
         );
 
         Self {
-            s3_client,
-            pg_pool,
             config: config.clone(),
 
-            repositories: repository.clone(),
             services: Services::new(repository, config),
         }
     }
