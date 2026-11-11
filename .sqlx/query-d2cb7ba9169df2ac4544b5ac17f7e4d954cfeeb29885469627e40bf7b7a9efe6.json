@@ -46,7 +46,8 @@
                   "kind": {
                     "Enum": [
                       "thumbnails",
-                      "frames"
+                      "frames",
+                      "transcode"
                     ]
                   }
                 }
@@ -94,7 +95,8 @@
                   "kind": {
                     "Enum": [
                       "thumbnails",
-                      "frames"
+                      "frames",
+                      "transcode"
                     ]
                   }
                 }
