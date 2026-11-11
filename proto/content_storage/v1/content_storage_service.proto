@@ -15,13 +15,17 @@ service ContentStorageService {
   rpc GetDownloadUrls(GetDownloadUrlsRequest) returns (GetDownloadUrlsResponse);
 }
 
-// Processing performed by this service after the file is uploaded.
+// Processing performed by the service itself.
+// A task that does not support the verified content type of the file is skipped:
+// the received event lists only the tasks that were actually scheduled.
 enum ProcessingTask {
   PROCESSING_TASK_UNSPECIFIED = 0;
   // Create preview variants: resized images, animated WebP for GIF, posters for video.
   PROCESSING_TASK_THUMBNAILS = 1;
   // Extract frames for external analysis (for example, NSFW checks).
   PROCESSING_TASK_FRAMES = 2;
+  // Replace the original with a version optimized for the web (currently video only).
+  PROCESSING_TASK_TRANSCODE = 3;
 }
 
 message CreateUploadRequest {

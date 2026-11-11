@@ -27,6 +27,7 @@ pub struct Upload {
 pub enum ProcessingTask {
     Thumbnails,
     Frames,
+    Transcode,
 }
 
 #[derive(Debug, Clone)]
