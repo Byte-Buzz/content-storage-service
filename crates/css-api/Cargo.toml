@@ -24,6 +24,9 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal", "
 # S3
 aws-sdk-s3.workspace = true
 
+# Queue
+lapin.workspace = true
+
 # Database
 sqlx = { workspace = true, features = ["chrono", "uuid"] }
 

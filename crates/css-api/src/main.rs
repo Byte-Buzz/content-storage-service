@@ -41,6 +41,8 @@ async fn main() -> Result<(), BoxError> {
         let _ = grpc_rx.changed().await;
     });
 
+    let (_amqp_conn, amqp_channel) = transport::amqp::connect(&config.amqp).await?;
+
     let state = transport::http::CheckState {
         pg_pool,
         s3_client,

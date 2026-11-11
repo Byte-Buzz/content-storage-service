@@ -30,6 +30,9 @@ aws-config = "1.8.12"
 aws-sdk-s3 = "1.119.0"
 aws-sigv4 = "1.6.4"
 
+# Queue
+lapin = { version = "4.12.3", default-features = false, features = ["tokio"] }
+
 # Database
 sqlx = { version = "0.8.6", default-features = false, features = [
     "runtime-tokio-rustls",
