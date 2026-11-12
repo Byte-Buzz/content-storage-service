@@ -20,6 +20,7 @@ prost-types = "0.14.1"
 
 # Async runtime
 tokio = "1.48.0"
+futures-lite = "2.6.1"
 
 # Serialization
 serde = { version = "1.0.228", features = ["derive"] }

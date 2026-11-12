@@ -20,6 +20,7 @@ prost-types.workspace = true
 
 # Async runtime
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal", "net", "time", "sync"] }
+futures-lite.workspace = true
 
 # S3
 aws-sdk-s3.workspace = true
@@ -36,6 +37,9 @@ thiserror.workspace = true
 # Tools
 uuid = { workspace = true, features = ["v4"] }
 chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+percent-encoding.workspace = true
 
 # Logging
 tracing.workspace = true

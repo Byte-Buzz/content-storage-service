@@ -8,6 +8,11 @@ use lapin::{
 
 use crate::config::AmqpConfig;
 
+mod consumer;
+mod event;
+
+pub use consumer::run;
+
 pub async fn connect(
     config: &AmqpConfig,
 ) -> Result<(Connection, Channel), Box<dyn std::error::Error>> {

@@ -36,12 +36,18 @@ async fn main() -> Result<(), BoxError> {
 
     let (shutdown_tx, shutdown_rx) = watch::channel(false);
 
+    let (amqp_conn, amqp_channel) = transport::amqp::connect(&config.amqp).await?;
+    let event_listener = transport::amqp::run(
+        amqp_channel,
+        &config.amqp.queue,
+        app.services.storage_event_service,
+        shutdown_rx.clone(),
+    );
+
     let mut grpc_rx = shutdown_rx.clone();
     let grpc = grpc_router.serve_with_shutdown(grpc_addr, async move {
         let _ = grpc_rx.changed().await;
     });
-
-    let (_amqp_conn, amqp_channel) = transport::amqp::connect(&config.amqp).await?;
 
     let state = transport::http::CheckState {
         pg_pool,
@@ -84,8 +90,11 @@ async fn main() -> Result<(), BoxError> {
     tokio::try_join!(
         async { grpc.await.map_err(BoxError::from) },
         async { http.await.map_err(BoxError::from) },
+        async { event_listener.await },
         signal,
     )?;
+
+    amqp_conn.close(200, "shutdown".into()).await?;
 
     Ok(())
 }
