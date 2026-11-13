@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package content_storage.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Owner of the file storage. Clients upload directly to storage using
+// forms issued here; the service never receives file bytes itself.
+service ContentStorageService {
+  // Reserves an upload and returns a presigned form for direct upload to storage.
+  rpc CreateUpload(CreateUploadRequest) returns (CreateUploadResponse);
+
+  // Returns presigned download URLs for stored files.
+  // The caller is responsible for checking access before requesting them.
+  rpc GetDownloadUrls(GetDownloadUrlsRequest) returns (GetDownloadUrlsResponse);
+}
+
+// Processing performed by this service after the file is uploaded.
+enum ProcessingTask {
+  PROCESSING_TASK_UNSPECIFIED = 0;
+  // Create preview variants: resized images, animated WebP for GIF, posters for video.
+  PROCESSING_TASK_THUMBNAILS = 1;
+  // Extract frames for external analysis (for example, NSFW checks).
+  PROCESSING_TASK_FRAMES = 2;
+}
+
+message CreateUploadRequest {
+  // Application namespace, used as the key prefix (for example, "mytro").
+  string app_name = 1;
+  // Declared MIME type. Enforced by the upload form; the real type is
+  // verified after upload and the file is rejected on a category mismatch.
+  string content_type = 2;
+  // Real content types accepted after upload, exact match.
+  // If empty, only the category of the declared type is checked.
+  repeated string accepted_content_types = 3;
+  // Maximum file size in bytes, enforced by storage.
+  uint64 max_size = 4;
+  // Processing performed by this service.
+  repeated ProcessingTask tasks = 5;
+  // Tasks for other services. Not interpreted here, copied into events as is.
+  // Names should be prefixed with the project name (for example, "mytro.nsfw").
+  repeated string external_tasks = 6;
+  // Opaque payload for the caller. Not interpreted here, copied into events.
+  bytes info = 7;
+  // Lifetime of the upload form in seconds. A server default is used if unset.
+  optional uint32 upload_url_ttl = 8;
+  // Maximum video duration in seconds. Longer videos are rejected after upload.
+  optional uint32 max_duration_seconds = 9;
+}
+
+message CreateUploadResponse {
+  // Identifier of the file for its whole lifecycle.
+  string file_id = 1;
+  // Form action: the client sends multipart/form-data to this URL.
+  string upload_url = 2;
+  // Form fields to send as is. All of them must precede the "file" field.
+  map<string, string> form_fields = 3;
+  // Storage rejects the form after this moment.
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message DownloadUrlRequest {
+  string file_id = 1;
+  // Variant name (for example, "236x"). The original file if unset.
+  optional string variant = 2;
+  // File name suggested to the browser when saving. Served inline if unset.
+  optional string download_name = 3;
+}
+
+message GetDownloadUrlsRequest {
+  repeated DownloadUrlRequest items = 1;
+}
+
+message DownloadUrl {
+  string file_id = 1;
+  // Variant name, unset for the original file.
+  optional string variant = 2;
+  // Presigned URL, valid until expires_at.
+  string url = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message GetDownloadUrlsResponse {
+  // URLs for found files. Unknown files and variants are omitted,
+  // so the caller compares the result with the request.
+  repeated DownloadUrl urls = 1;
+}

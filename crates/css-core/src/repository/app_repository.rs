@@ -1,6 +1,6 @@
 use crate::{
-    repository::map_sqlx_error,
     domain::{errors::RepositoryError, interfaces::AppInterface, models},
+    repository::map_sqlx_error,
 };
 
 pub struct AppRepository {
@@ -27,36 +27,6 @@ impl AppInterface for AppRepository {
                 RETURNING id, name
             "#,
             name,
-        )
-        .fetch_one(&self.pool)
-        .await
-        .map_err(map_sqlx_error)
-    }
-
-    async fn get_by_name(&self, name: &str) -> Result<models::App, RepositoryError> {
-        sqlx::query_as!(
-            models::App,
-            r#"
-                SELECT id, name
-                FROM app
-                WHERE name = $1
-            "#,
-            name,
-        )
-        .fetch_one(&self.pool)
-        .await
-        .map_err(map_sqlx_error)
-    }
-
-    async fn get_by_id(&self, id: i64) -> Result<models::App, RepositoryError> {
-        sqlx::query_as!(
-            models::App,
-            r#"
-                SELECT id, name
-                FROM app
-                WHERE id = $1
-            "#,
-            id,
         )
         .fetch_one(&self.pool)
         .await

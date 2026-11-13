@@ -19,12 +19,21 @@ pub struct Repositories {
 }
 
 impl Repositories {
-    pub fn new(pool: sqlx::PgPool, s3_client: Client, config: &S3Config) -> Self {
+    pub fn new(
+        pool: sqlx::PgPool,
+        s3_client: Client,
+        presign_s3_client: Client,
+        config: &S3Config,
+    ) -> Self {
         Self {
             upload_repository: Box::new(upload_repository::UploadRepository::new(pool.clone())),
             app_repository: Box::new(app_repository::AppRepository::new(pool.clone())),
             file_repository: Box::new(file_repository::FileRepository::new(pool.clone())),
-            s3_repository: Box::new(s3_repository::S3Repository::new(s3_client, config)),
+            s3_repository: Box::new(s3_repository::S3Repository::new(
+                s3_client,
+                presign_s3_client,
+                config,
+            )),
         }
     }
 }

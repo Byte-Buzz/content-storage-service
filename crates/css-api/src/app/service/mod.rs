@@ -7,7 +7,7 @@ use css_core::repository;
 pub use file_service::FileService;
 pub use upload_service::UploadService;
 
-pub use file_service::UploadFile;
+use crate::config;
 
 #[derive(Clone)]
 pub struct Services {
@@ -16,9 +16,9 @@ pub struct Services {
 }
 
 impl Services {
-    pub fn new(repositories: repository::Repositories) -> Self {
-        let upload_service = UploadService::new(repositories.clone());
-        let file_service = FileService::new(repositories.clone());
+    pub fn new(repositories: repository::Repositories, config: config::Config) -> Self {
+        let upload_service = UploadService::new(repositories.clone(), config.upload);
+        let file_service = FileService::new(repositories.clone(), config.download);
 
         Self {
             upload_service,

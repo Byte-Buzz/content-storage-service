@@ -1,10 +1,12 @@
-use actix_web::web;
+use axum::{Router, routing::get};
 
-mod error;
-mod files;
-mod query;
-mod uploads;
+mod check;
 
-pub fn create_http_server(cfg: &mut web::ServiceConfig) {
-    cfg.service(uploads::upload_file).service(files::get_file);
+pub use check::CheckState;
+
+pub fn create_http_server(services: CheckState) -> Router {
+    Router::new()
+        .route("/health", get(check::health))
+        .route("/ready", get(check::ready))
+        .with_state(services)
 }

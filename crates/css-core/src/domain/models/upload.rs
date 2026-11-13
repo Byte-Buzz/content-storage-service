@@ -1,44 +1,65 @@
-use chrono::NaiveDateTime;
+use std::collections::HashMap;
 
-use crate::domain::models::file::FileAccess;
+use chrono::Utc;
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "db", derive(sqlx::FromRow))]
 pub struct Upload {
     pub id: uuid::Uuid,
     pub app_id: i64,
-    pub filename: String,
     pub content_type: String,
-    pub max_size: i32,
-    pub settings: i32,
-    pub info: serde_json::Value,
-    pub access: FileAccess,
-    pub secret: String,
-    pub created_at: NaiveDateTime,
-    pub expires_at: NaiveDateTime,
+    pub accepted_content_types: Vec<String>,
+    pub max_size: i64,
+    pub max_duration_seconds: Option<i32>,
+    pub tasks: Vec<ProcessingTask>,
+    pub external_tasks: Vec<String>,
+    pub info: Option<Vec<u8>>,
+    pub created_at: chrono::DateTime<Utc>,
+    pub expires_at: chrono::DateTime<Utc>,
+}
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "db", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "db",
+    sqlx(type_name = "processing_task", rename_all = "snake_case")
+)]
+pub enum ProcessingTask {
+    Thumbnails,
+    Frames,
 }
 
 #[derive(Debug, Clone)]
 pub struct CreateUpload {
     pub id: uuid::Uuid,
     pub app_id: i64,
-    pub filename: String,
     pub content_type: String,
-    pub max_size: i32,
-    pub settings: Option<i32>,
-    pub info: serde_json::Value,
-    pub access: FileAccess,
-    pub secret: String,
-    pub expires_at: Option<NaiveDateTime>,
+    pub accepted_content_types: Vec<String>,
+    pub max_size: i64,
+    pub max_duration_seconds: Option<i32>,
+    pub tasks: Vec<ProcessingTask>,
+    pub external_tasks: Vec<String>,
+    pub info: Option<Vec<u8>>,
+    pub expires_at: chrono::DateTime<Utc>,
 }
 
 #[derive(Debug, Clone)]
-pub struct CreateNewUpload {
+pub struct UploadRequest {
     pub app_name: String,
-    pub filename: String,
-    pub settings: Option<i32>,
     pub content_type: String,
-    pub max_size: u32,
-    pub info: serde_json::Value,
-    pub upload_url_ttl: Option<u32>,
-    pub access: FileAccess,
+    pub accepted_content_types: Vec<String>,
+    pub max_size: u64,
+    pub max_duration_seconds: Option<u32>,
+    pub tasks: Vec<ProcessingTask>,
+    pub external_tasks: Vec<String>,
+    pub info: Option<Vec<u8>>,
+    pub upload_url_ttl: Option<std::time::Duration>,
+}
+
+#[derive(Debug, Clone)]
+pub struct UploadResponse {
+    pub file_id: uuid::Uuid,
+    pub upload_url: String,
+    pub form_fields: HashMap<String, String>,
+    pub expires_at: chrono::DateTime<Utc>,
 }

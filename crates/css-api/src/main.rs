@@ -1,12 +1,10 @@
-use actix_web::{App, HttpServer, web};
 use css_core::infrastructure::{
     database::create_pg_pool, logger::init_tracing, storage::create_s3_client,
 };
 use tokio::{
     signal::unix::{SignalKind, signal},
-    sync::oneshot,
+    sync::watch,
 };
-use tracing_actix_web::TracingLogger;
 
 use crate::config::Config;
 
@@ -14,37 +12,51 @@ mod app;
 mod config;
 mod transport;
 
-#[actix_web::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+type BoxError = Box<dyn std::error::Error>;
+
+#[tokio::main]
+async fn main() -> Result<(), BoxError> {
     init_tracing();
 
     let config = Config::from_env()?;
-    let s3_client = create_s3_client(&config.s3).await;
+    let s3_client = create_s3_client(&config.s3, config.s3.endpoint.clone()).await;
+    let presign_s3_client = create_s3_client(&config.s3, config.s3.public_endpoint.clone()).await;
 
     let pg_pool = create_pg_pool(&config.database).await?;
 
-    let app = app::App::new(s3_client, pg_pool, config.clone());
-
-    let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
+    let app = app::App::new(
+        s3_client.clone(),
+        presign_s3_client,
+        pg_pool.clone(),
+        config.clone(),
+    );
 
     let grpc_addr = app.config.grpc.address().parse()?;
     let grpc_router = transport::grpc::create_grpc_server(&app);
 
-    let grpc = grpc_router.serve_with_shutdown(grpc_addr, async {
-        shutdown_rx.await.ok();
+    let (shutdown_tx, shutdown_rx) = watch::channel(false);
+
+    let mut grpc_rx = shutdown_rx.clone();
+    let grpc = grpc_router.serve_with_shutdown(grpc_addr, async move {
+        let _ = grpc_rx.changed().await;
     });
 
-    let http_server = HttpServer::new(move || {
-        App::new()
-            .wrap(TracingLogger::default())
-            .app_data(web::Data::new(app.services.clone()))
-            .configure(transport::http::create_http_server)
-    })
-    .bind(app.config.server.address())?
-    .shutdown_timeout(30)
-    .run();
+    let state = transport::http::CheckState {
+        pg_pool,
+        s3_client,
+        buckets: vec![
+            app.config.s3.bucket.clone(),
+            app.config.s3.temp_bucket.clone(),
+        ],
+    };
 
-    let http_handle = http_server.handle();
+    let router = transport::http::create_http_server(state);
+    let listener = tokio::net::TcpListener::bind(app.config.server.address()).await?;
+
+    let mut http_rx = shutdown_rx.clone();
+    let http = axum::serve(listener, router).with_graceful_shutdown(async move {
+        let _ = http_rx.changed().await;
+    });
 
     let shutdown_signal = async {
         let mut sigterm =
@@ -61,18 +73,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    let grpc = tokio::spawn(grpc);
+    let signal = async move {
+        shutdown_signal.await;
+        let _ = shutdown_tx.send(true);
+        Ok::<(), BoxError>(())
+    };
 
-    tokio::select! {
-        res = grpc => { res??; }
-        res = http_server => { res?; }
-        _ = shutdown_signal => {
-            tracing::info!("shutdown signal received");
-        }
-    }
-
-    let _ = shutdown_tx.send(());
-    http_handle.stop(true).await;
+    tokio::try_join!(
+        async { grpc.await.map_err(BoxError::from) },
+        async { http.await.map_err(BoxError::from) },
+        signal,
+    )?;
 
     Ok(())
 }
