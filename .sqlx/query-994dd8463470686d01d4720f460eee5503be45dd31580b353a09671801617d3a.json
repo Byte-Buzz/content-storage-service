@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO processing_jobs (file_id, kind)\n                    VALUES ($1, $2)\n                ON CONFLICT (file_id, kind) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "processing_job_kind",
+            "kind": {
+              "Enum": [
+                "ingest",
+                "thumbnails",
+                "frames",
+                "transcode"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "994dd8463470686d01d4720f460eee5503be45dd31580b353a09671801617d3a"
+}

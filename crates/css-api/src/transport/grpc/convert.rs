@@ -9,6 +9,7 @@ fn task_from_proto(value: i32) -> Result<models::ProcessingTask, tonic::Status> 
     match pb::ProcessingTask::try_from(value) {
         Ok(pb::ProcessingTask::Thumbnails) => Ok(models::ProcessingTask::Thumbnails),
         Ok(pb::ProcessingTask::Frames) => Ok(models::ProcessingTask::Frames),
+        Ok(pb::ProcessingTask::Transcode) => Ok(models::ProcessingTask::Transcode),
         Ok(pb::ProcessingTask::Unspecified) | Err(_) => Err(tonic::Status::invalid_argument(
             format!("unsupported task: {value}"),
         )),

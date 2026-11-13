@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use super::env::get_env_or;
 
 /// Database connection settings.
@@ -6,12 +8,23 @@ use super::env::get_env_or;
 /// - CSS_DB_MAX_OPEN_CONNS: max open connections. Defaults to 10.
 /// - CSS_DB_MAX_IDLE_CONNS: min idle connections. Defaults to 5.
 /// - CSS_DB_CONN_MAX_LIFETIME: connection lifetime in seconds. Defaults to 3600.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DatabaseConfig {
     pub url: String,
     pub max_open_conns: u32,
     pub max_idle_conns: u32,
     pub conn_max_lifetime: u64,
+}
+
+impl Debug for DatabaseConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DatabaseConfig")
+            .field("url", &"...")
+            .field("max_open_conns", &self.max_open_conns)
+            .field("max_idle_conns", &self.max_idle_conns)
+            .field("conn_max_lifetime", &self.conn_max_lifetime)
+            .finish()
+    }
 }
 
 impl DatabaseConfig {

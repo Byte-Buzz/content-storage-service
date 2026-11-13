@@ -2,6 +2,7 @@ mod error;
 
 mod app_repository;
 mod file_repository;
+mod job_repository;
 mod s3_repository;
 mod upload_repository;
 
@@ -16,6 +17,7 @@ pub struct Repositories {
     pub app_repository: Box<dyn interfaces::AppInterface>,
     pub file_repository: Box<dyn interfaces::FileInterface>,
     pub s3_repository: Box<dyn interfaces::S3Interface>,
+    pub job_repository: Box<dyn interfaces::JobInterface>,
 }
 
 impl Repositories {
@@ -34,6 +36,7 @@ impl Repositories {
                 presign_s3_client,
                 config,
             )),
+            job_repository: Box::new(job_repository::JobRepository::new(pool.clone())),
         }
     }
 }
@@ -45,6 +48,7 @@ impl Clone for Repositories {
             app_repository: self.app_repository.clone_box(),
             file_repository: self.file_repository.clone_box(),
             s3_repository: self.s3_repository.clone_box(),
+            job_repository: self.job_repository.clone_box(),
         }
     }
 }
