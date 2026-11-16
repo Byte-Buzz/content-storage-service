@@ -31,7 +31,7 @@ mod tests {
         assert_eq!(parse_temp_key(&key), None);
 
         let key = app;
-        assert_eq!(parse_temp_key(&key), None);
+        assert_eq!(parse_temp_key(key), None);
 
         let key = format!("{}/", app);
         assert_eq!(parse_temp_key(&key), None);

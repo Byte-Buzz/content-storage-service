@@ -76,9 +76,9 @@ impl UploadService {
         let (kind, subtype) = match upload.content_type.split_once("/") {
             Some(v) => v,
             _ => {
-                return Err(ServiceError::InvalidArgument(format!(
-                    "content_type must be a valid mime type"
-                )));
+                return Err(ServiceError::InvalidArgument(
+                    "content_type must be a valid mime type".to_string(),
+                ));
             }
         };
 
@@ -87,9 +87,9 @@ impl UploadService {
             || kind.trim().is_empty()
             || subtype.trim().is_empty()
         {
-            return Err(ServiceError::InvalidArgument(format!(
-                "content_type must be a valid mime type"
-            )));
+            return Err(ServiceError::InvalidArgument(
+                "content_type must be a valid mime type".to_string(),
+            ));
         }
 
         if upload

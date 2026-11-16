@@ -90,7 +90,7 @@ async fn main() -> Result<(), BoxError> {
     tokio::try_join!(
         async { grpc.await.map_err(BoxError::from) },
         async { http.await.map_err(BoxError::from) },
-        async { event_listener.await },
+        event_listener,
         signal,
     )?;
 
