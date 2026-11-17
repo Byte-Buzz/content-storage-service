@@ -10,7 +10,7 @@ use aws_sdk_s3::Client;
 
 use crate::{domain::interfaces, infrastructure::config::S3Config};
 
-pub(self) use self::error::map_sqlx_error;
+use self::error::map_sqlx_error;
 
 pub struct Repositories {
     pub upload_repository: Box<dyn interfaces::UploadInterface>,
